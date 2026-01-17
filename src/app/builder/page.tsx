@@ -13,6 +13,7 @@ import { ImageUpload } from '@/components/ui/image-upload'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { AIDescriptionAssistant } from '@/components/AIDescriptionAssistant'
 import {
   Building2,
   Globe,
@@ -1430,14 +1431,30 @@ export default function BuilderPage() {
                               Company Description *
                               <span className="text-red-400 text-xs">★</span>
                             </Label>
-                            <Textarea
-                              id="description"
-                              value={businessInfo.description}
-                              onChange={(e) => setBusinessInfo(prev => ({ ...prev, description: e.target.value }))}
-                              placeholder="Describe your company, products, and what makes you unique. This will help us create compelling content for your website..."
-                              rows={4}
-                              className="border-2 border-teal-200/50 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 bg-white/90 backdrop-blur-sm transition-all duration-300 hover:shadow-md resize-none"
-                            />
+                            <div className="relative">
+                              <Textarea
+                                id="description"
+                                value={businessInfo.description}
+                                onChange={(e) => setBusinessInfo(prev => ({ ...prev, description: e.target.value }))}
+                                placeholder="Describe your company, products, and what makes you unique. This will help us create compelling content for your website..."
+                                rows={4}
+                                className="border-2 border-teal-200/50 focus:border-teal-500 focus:ring-2 focus:ring-teal-200 bg-white/90 backdrop-blur-sm transition-all duration-300 hover:shadow-md resize-none pr-16"
+                              />
+                              <AIDescriptionAssistant
+                                fieldType="company"
+                                currentValue={businessInfo.description}
+                                onAccept={(newValue) => setBusinessInfo(prev => ({
+                                  ...prev,
+                                  description: newValue
+                                }))}
+                                context={{
+                                  company_name: businessInfo.company_name,
+                                  company_type: businessInfo.company_type,
+                                  categories: businessInfo.categories.map(c => c.name).slice(0, 5),
+                                  certifications: businessInfo.certifications.map(c => c.name).slice(0, 3)
+                                }}
+                              />
+                            </div>
                           </motion.div>
                         </div>
                       </div>

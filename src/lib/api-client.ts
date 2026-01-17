@@ -291,6 +291,82 @@ export class ApiClient {
     const query = queryParams.toString();
     return this.get<any>(`/api/admin/jobs${query ? `?${query}` : ''}`);
   }
+
+  // AI Description Assistant endpoints
+  async streamDescription(
+    operation: string,
+    fieldType: string,
+    currentText: string,
+    context: Record<string, any>,
+    onChunk: (text: string) => void,
+    onComplete: () => void,
+    onError: (error: Error) => void
+  ): Promise<void> {
+    const token = this.getToken();
+
+    try {
+      const response = await fetch(`${this.baseUrl}/api/ai-assistant/description/stream`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          operation,
+          field_type: fieldType,
+          current_text: currentText,
+          context
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ detail: 'Stream failed' }));
+        throw new Error(errorData.detail || 'Stream failed');
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('ReadableStream not supported');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n\n');
+
+        // Process complete lines, keep incomplete line in buffer
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+
+              if (data.error) {
+                onError(new Error(data.error));
+                return;
+              }
+
+              if (data.done) {
+                onComplete();
+              } else if (data.text) {
+                onChunk(data.text);
+              }
+            } catch (e) {
+              console.error('Failed to parse SSE data:', e);
+            }
+          }
+        }
+      }
+    } catch (error) {
+      onError(error as Error);
+    }
+  }
 }
 
 // Export singleton instance

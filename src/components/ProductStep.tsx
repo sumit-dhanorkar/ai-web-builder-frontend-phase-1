@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { AIDescriptionAssistant } from '@/components/AIDescriptionAssistant'
 import { 
   Package, 
   Plus, 
@@ -102,7 +103,10 @@ export function ProductStep({
   const [currentCategoryIndex, setCurrentCategoryIndex] = useState<number | null>(null)
   const [currentProductIndex, setCurrentProductIndex] = useState<number | null>(null)
   const [isEditMode, setIsEditMode] = useState(false)
-  
+
+  // Accordion state
+  const [openAccordion, setOpenAccordion] = useState<string>('')
+
   // Certification modal states
   const [isCertificationModalOpen, setIsCertificationModalOpen] = useState(false)
   const [currentCertification, setCurrentCertification] = useState<Certification | null>(null)
@@ -116,6 +120,8 @@ export function ProductStep({
       products: []
     }
     onUpdateCategories([...categories, newCategory])
+    // Open the newly added category accordion
+    setOpenAccordion(`category-${categories.length}`)
   }
 
   const removeCategory = (index: number) => {
@@ -469,7 +475,7 @@ export function ProductStep({
 
                 {/* Categories Display */}
                 {categories.length > 0 ? (
-                  <Accordion type="single" collapsible className="space-y-6">
+                  <Accordion type="single" collapsible className="space-y-6" value={openAccordion} onValueChange={setOpenAccordion}>
               {categories.map((category, categoryIndex) => {
                 
                 return (
@@ -493,10 +499,10 @@ export function ProductStep({
                           <span className="text-white font-bold">{categoryIndex + 1}</span>
                         </motion.div>
                         <div>
-                          <Badge 
-                            variant="outline" 
+                          <Badge
+                            variant="outline"
                             className="mb-2 bg-teal-100 border-teal-300 text-teal-700">
-                          
+
                             <Star className="w-3 h-3 mr-1" />
                             Category {categoryIndex + 1}
                           </Badge>
@@ -524,25 +530,38 @@ export function ProductStep({
                     </div>
                   </AccordionTrigger>
                   <AccordionContent className="space-y-4 pt-4">
-                    {/* Category Information - Compact */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <Label className="text-sm font-medium text-gray-700">Category Name *</Label>
-                        <Input
-                          value={category.name}
-                          onChange={(e) => updateCategory(categoryIndex, 'name', e.target.value)}
-                          placeholder="e.g., Organic Fertilizers"
-                          className="border-2 border-teal-200/50 focus:border-teal-500 bg-white"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        <Label className="text-sm font-medium text-gray-700">Description</Label>
+                    {/* Category Name Input */}
+                    <div className="space-y-1">
+                      <Label className="text-sm font-medium text-gray-700">Category Name *</Label>
+                      <Input
+                        value={category.name}
+                        onChange={(e) => updateCategory(categoryIndex, 'name', e.target.value)}
+                        placeholder="e.g., Organic Fertilizers"
+                        className="border-2 border-teal-200/50 focus:border-teal-500 bg-white"
+                      />
+                    </div>
+
+                    {/* Category Description - Full Width */}
+                    <div className="space-y-1">
+                      <Label className="text-sm font-medium text-gray-700 flex items-center">
+                        Description
+                      </Label>
+                      <div className="relative">
                         <Textarea
                           value={category.description}
                           onChange={(e) => updateCategory(categoryIndex, 'description', e.target.value)}
                           placeholder="Brief description of this category"
                           rows={2}
-                          className="border-2 border-teal-200/50 focus:border-teal-500 bg-white resize-none"
+                          className="border-2 border-teal-200/50 focus:border-teal-500 bg-white resize-none pr-16"
+                        />
+                        <AIDescriptionAssistant
+                          fieldType="category"
+                          currentValue={category.description}
+                          onAccept={(newValue) => updateCategory(categoryIndex, 'description', newValue)}
+                          context={{
+                            category_name: category.name,
+                            products: category.products.map(p => p.name)
+                          }}
                         />
                       </div>
                     </div>
@@ -1043,14 +1062,30 @@ export function ProductStep({
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700">Product Description</Label>
-                  <Textarea
-                    value={currentProduct.description}
-                    onChange={(e) => updateCurrentProduct('description', e.target.value)}
-                    placeholder="Detailed description highlighting key features and benefits..."
-                    rows={4}
-                    className="border-2 border-teal-200/50 focus:border-teal-500 resize-none"
-                  />
+                  <Label className="text-sm font-medium text-gray-700 flex items-center">
+                    Product Description
+                  </Label>
+                  <div className="relative">
+                    <Textarea
+                      value={currentProduct.description}
+                      onChange={(e) => updateCurrentProduct('description', e.target.value)}
+                      placeholder="Detailed description highlighting key features and benefits..."
+                      rows={4}
+                      className="border-2 border-teal-200/50 focus:border-teal-500 resize-none pr-16"
+                    />
+                    <AIDescriptionAssistant
+                      fieldType="product"
+                      currentValue={currentProduct.description}
+                      onAccept={(newValue) => updateCurrentProduct('description', newValue)}
+                      context={{
+                        product_name: currentProduct.name,
+                        hsn_code: currentProduct.hsn_code,
+                        specifications: currentProduct.specifications,
+                        key_benefits: currentProduct.key_benefits,
+                        category_name: categories[currentCategoryIndex ?? 0]?.name || ''
+                      }}
+                    />
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <ImageUpload
@@ -1268,13 +1303,24 @@ export function ProductStep({
                     Certification Description
                     <FileText className="w-4 h-4" />
                   </Label>
-                  <Textarea
-                    value={currentCertification.description}
-                    onChange={(e) => updateCurrentCertification('description', e.target.value)}
-                    placeholder="Brief description highlighting the certification's importance and scope..."
-                    rows={4}
-                    className="border-2 border-teal-200/50 focus:border-teal-500 resize-none"
-                  />
+                  <div className="relative">
+                    <Textarea
+                      value={currentCertification.description}
+                      onChange={(e) => updateCurrentCertification('description', e.target.value)}
+                      placeholder="Brief description highlighting the certification's importance and scope..."
+                      rows={4}
+                      className="border-2 border-teal-200/50 focus:border-teal-500 resize-none pr-16"
+                    />
+                    <AIDescriptionAssistant
+                      fieldType="certification"
+                      currentValue={currentCertification.description}
+                      onAccept={(newValue) => updateCurrentCertification('description', newValue)}
+                      context={{
+                        cert_name: currentCertification.name,
+                        issuing_authority: currentCertification.issuing_authority
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
