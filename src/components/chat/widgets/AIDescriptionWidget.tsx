@@ -141,14 +141,14 @@ export function AIDescriptionWidget({
   }
 
   return (
-    <div className="mt-3 p-4 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg border-2 border-purple-200 space-y-4">
+    <div className="mt-3 p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-lg border-2 border-teal-200 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 text-sm text-purple-700 font-medium">
+        <div className="flex items-center gap-2 text-sm text-teal-700 font-medium">
           <Sparkles className="w-4 h-4" />
           AI Description Assistant
         </div>
-        <span className="text-xs text-purple-600">
+        <span className="text-xs text-teal-600">
           Powered by AI
         </span>
       </div>
@@ -163,7 +163,7 @@ export function AIDescriptionWidget({
             <Button
               onClick={handleGenerateAI}
               disabled={disabled}
-              className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold"
+              className="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold"
             >
               <Sparkles className="w-4 h-4 mr-2" />
               Generate with AI
@@ -172,7 +172,7 @@ export function AIDescriptionWidget({
               onClick={handleManual}
               disabled={disabled}
               variant="outline"
-              className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+              className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50"
             >
               Write Manually
             </Button>
@@ -185,8 +185,8 @@ export function AIDescriptionWidget({
         <div className="space-y-3">
           <div className="flex items-center justify-center py-8">
             <div className="text-center">
-              <Loader2 className="w-8 h-8 animate-spin text-purple-600 mx-auto mb-3" />
-              <p className="text-sm text-purple-700 font-medium">
+              <Loader2 className="w-8 h-8 animate-spin text-teal-600 mx-auto mb-3" />
+              <p className="text-sm text-teal-700 font-medium">
                 AI is writing your description...
               </p>
               <p className="text-xs text-gray-600 mt-1">
@@ -197,10 +197,10 @@ export function AIDescriptionWidget({
 
           {/* Live preview of generation */}
           {description && (
-            <div className="bg-white rounded-lg p-4 border border-purple-200 min-h-[100px]">
+            <div className="bg-white rounded-lg p-4 border border-teal-200 min-h-[100px]">
               <p className="text-sm text-gray-700 whitespace-pre-wrap">
                 {description}
-                <span className="inline-block w-2 h-4 bg-purple-600 animate-pulse ml-1" />
+                <span className="inline-block w-2 h-4 bg-teal-600 animate-pulse ml-1" />
               </p>
             </div>
           )}
@@ -217,7 +217,7 @@ export function AIDescriptionWidget({
             disabled={disabled}
             rows={6}
             maxLength={maxLength}
-            className="border-2 border-purple-200 focus:border-purple-500 transition-colors"
+            className="border-2 border-teal-200 focus:border-teal-500 transition-colors"
           />
 
           <div className="flex items-center justify-between text-xs">
@@ -250,7 +250,7 @@ export function AIDescriptionWidget({
                 onClick={handleRegenerate}
                 disabled={disabled}
                 variant="outline"
-                className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+                className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Regenerate

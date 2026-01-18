@@ -14,6 +14,8 @@ import { CertificationEntryWidget } from './CertificationEntryWidget'
 import { TeamMemberEntryWidget } from './TeamMemberEntryWidget'
 import { ThemeSelectWidget } from './ThemeSelectWidget'
 import { ColorSchemeSelectWidget } from './ColorSchemeSelectWidget'
+import { DesignConfigWidget } from './DesignConfigWidget'
+import { GeneralSettingsWidget } from './GeneralSettingsWidget'
 import { AIDescriptionWidget } from './AIDescriptionWidget'
 import { SummaryReviewWidget } from './SummaryReviewWidget'
 import { SkipButtonWidget } from './SkipButtonWidget'
@@ -60,7 +62,37 @@ export function WidgetRenderer({ widget, onComplete, disabled = false }: WidgetR
       return (
         <ThemeSelectWidget
           field={widget.field}
-          config={widget.config}
+          config={widget.config as any}
+          onComplete={onComplete}
+          disabled={disabled}
+        />
+      )
+
+    case 'color_scheme_select':
+      return (
+        <ColorSchemeSelectWidget
+          field={widget.field}
+          config={widget.config as any}
+          onComplete={onComplete}
+          disabled={disabled}
+        />
+      )
+
+    case 'design_config':
+      return (
+        <DesignConfigWidget
+          field={widget.field}
+          config={widget.config as any}
+          onComplete={onComplete}
+          disabled={disabled}
+        />
+      )
+
+    case 'general_settings':
+      return (
+        <GeneralSettingsWidget
+          field={widget.field}
+          config={widget.config as any}
           onComplete={onComplete}
           disabled={disabled}
         />
@@ -70,7 +102,7 @@ export function WidgetRenderer({ widget, onComplete, disabled = false }: WidgetR
       return (
         <ProductEntryWidget
           field={widget.field}
-          config={widget.config}
+          config={widget.config as any}
           onComplete={onComplete}
           disabled={disabled}
         />
@@ -80,7 +112,7 @@ export function WidgetRenderer({ widget, onComplete, disabled = false }: WidgetR
       return (
         <CertificationEntryWidget
           field={widget.field}
-          config={widget.config}
+          config={widget.config as any}
           onComplete={onComplete}
           disabled={disabled}
         />
@@ -90,7 +122,7 @@ export function WidgetRenderer({ widget, onComplete, disabled = false }: WidgetR
       return (
         <TeamMemberEntryWidget
           field={widget.field}
-          config={widget.config}
+          config={widget.config as any}
           onComplete={onComplete}
           disabled={disabled}
         />
@@ -100,7 +132,7 @@ export function WidgetRenderer({ widget, onComplete, disabled = false }: WidgetR
       return (
         <AIDescriptionWidget
           field={widget.field}
-          config={widget.config}
+          config={widget.config as any}
           onComplete={onComplete}
           disabled={disabled}
         />
@@ -110,7 +142,7 @@ export function WidgetRenderer({ widget, onComplete, disabled = false }: WidgetR
       return (
         <SummaryReviewWidget
           field={widget.field}
-          config={widget.config}
+          config={widget.config as any}
           onComplete={onComplete}
           disabled={disabled}
         />
@@ -120,7 +152,7 @@ export function WidgetRenderer({ widget, onComplete, disabled = false }: WidgetR
       return (
         <SkipButtonWidget
           field={widget.field}
-          config={widget.config}
+          config={widget.config as any}
           onComplete={onComplete}
           disabled={disabled}
         />

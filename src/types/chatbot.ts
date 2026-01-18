@@ -37,7 +37,11 @@ export type WidgetType =
   | 'certification_entry'
   | 'ai_description'
   | 'summary_review'
-  | 'skip_button';
+  | 'skip_button'
+  | 'theme_select'
+  | 'color_scheme_select'
+  | 'general_settings'
+  | 'design_config';
 
 export interface Widget {
   type: WidgetType;
@@ -53,6 +57,11 @@ export interface WidgetConfig {
   options?: Array<{ label: string; value: string; flag?: string }>;
   multiple?: boolean;
   required?: boolean;
+  label?: string;
+  required_fields?: string[];
+  section?: string;
+  title?: string;
+  next_section?: string;
   [key: string]: any;
 }
 

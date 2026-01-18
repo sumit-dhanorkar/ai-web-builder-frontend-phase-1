@@ -107,7 +107,7 @@ export function Message({ message, isLatest }: MessageProps) {
       {/* Avatar */}
       <div className={`
         flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center
-        ${isUser ? 'bg-gradient-to-br from-indigo-500 to-purple-500' : 'bg-gradient-to-br from-teal-500 to-emerald-500'}
+        ${isUser ? 'bg-gradient-to-br from-teal-500 to-emerald-500' : 'bg-gradient-to-br from-teal-500 to-emerald-500'}
       `}>
         {isUser ? (
           <User className="w-5 h-5 text-white" />
@@ -121,28 +121,15 @@ export function Message({ message, isLatest }: MessageProps) {
         flex flex-col max-w-[85%] sm:max-w-[75%] min-w-0
         ${isUser ? 'items-end' : 'items-start'}
       `}>
-        {/* Sender Label */}
-        <span className="text-xs text-gray-500 mb-1 px-1 hidden sm:block">
-          {isUser ? 'You' : 'AI Assistant'}
-        </span>
-
         {/* Message Content */}
         <div className={`
           rounded-2xl px-3 py-2 sm:px-4 sm:py-3 shadow-md break-words
           ${isUser
-            ? 'bg-gradient-to-br from-indigo-500 to-purple-500 text-white'
+            ? 'bg-gradient-to-br from-teal-600 to-emerald-600 text-white'
             : 'bg-white border border-gray-200 text-gray-800'
           }
           ${message.status === 'error' ? 'border-2 border-red-500' : ''}
         `}>
-          {/* Show loading indicator for sending */}
-          {message.status === 'sending' && isUser && (
-            <div className="flex items-center gap-2">
-              <Loader2 className="w-4 h-4 animate-spin" />
-              <span className="text-sm">Sending...</span>
-            </div>
-          )}
-
           {/* Show typing indicator for AI */}
           {message.status === 'sending' && isAI && message.content === '' && (
             <div className="flex items-center gap-2">
@@ -151,7 +138,6 @@ export function Message({ message, isLatest }: MessageProps) {
                 <span className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
                 <span className="w-2 h-2 bg-teal-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
               </div>
-              <span className="text-sm text-gray-600">Typing...</span>
             </div>
           )}
 

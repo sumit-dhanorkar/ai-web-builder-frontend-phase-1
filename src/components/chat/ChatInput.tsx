@@ -108,7 +108,7 @@ export function ChatInput({ onSend, disabled = false, placeholder = 'Type your m
         {/* Hint text */}
         <div id="message-hint" className="mt-1.5 sm:mt-2 flex items-center justify-between text-xs text-gray-500" role="status" aria-live="polite">
           {hasActiveWidget ? (
-            <span className="text-purple-600 font-medium">💡 Use the widget above or type here</span>
+            <span className="text-teal-600 font-medium">💡 Use the widget above or type here</span>
           ) : (
             <>
               <span className="hidden sm:inline">Press Enter to send, Shift+Enter for new line</span>

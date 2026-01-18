@@ -8,6 +8,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 import { chatAPI } from './chat-api'
+import { useAuth } from './auth-context'
 import type {
   Message,
   ConversationState,
@@ -47,6 +48,7 @@ interface ChatProviderProps {
 }
 
 export function ChatProvider({ children }: ChatProviderProps) {
+  const { user } = useAuth()
   const [sessionId, setSessionId] = useState<string | null>(null)
   const [currentState, setCurrentState] = useState<ConversationState>('welcome' as ConversationState)
   const [messages, setMessages] = useState<Message[]>([])
@@ -157,6 +159,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
       setUIState(prev => ({ ...prev, isLoading: true }))
 
       const response = await chatAPI.initializeSession({
+        user_id: user?.id || 'guest',
         resume: false,
       })
 
@@ -185,7 +188,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
     } finally {
       setUIState(prev => ({ ...prev, isLoading: false }))
     }
-  }, [])
+  }, [user])
 
   /**
    * Send welcome message

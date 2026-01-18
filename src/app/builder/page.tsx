@@ -675,18 +675,6 @@ export default function BuilderPage() {
                 <span>AI-Powered Builder</span>
               </motion.div>
 
-              {/* Switch to Chat Button */}
-              <Button
-                onClick={handleSwitchToChat}
-                variant="outline"
-                size="sm"
-                className="hidden md:flex items-center gap-2 border-2 border-teal-400 hover:bg-teal-50 text-teal-700 font-medium transition-all duration-200"
-              >
-                <MessageSquare className="w-4 h-4" />
-                Switch to Chat
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-
               {/* Profile Dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -808,13 +796,31 @@ export default function BuilderPage() {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
+        <div className="h-full overflow-y-auto py-4 flex flex-col scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500">
+          <div className="flex-1">
+            <EnhancedProgressDisplay
+              currentStep={currentStep}
+              steps={steps}
+              onStepClick={setCurrentStep}
+              isCollapsed={isSidebarCollapsed}
+            />
+          </div>
 
-        <EnhancedProgressDisplay
-          currentStep={currentStep}
-          steps={steps}
-          onStepClick={setCurrentStep}
-          isCollapsed={isSidebarCollapsed}
-        />
+          {/* Switch to Chat Button */}
+          {!isSidebarCollapsed && (
+            <div className="px-4 pb-4 pt-6 mt-6 border-t border-gray-200/50">
+              <Button
+                onClick={handleSwitchToChat}
+                variant="outline"
+                className="w-full h-12 items-center justify-center gap-2 border-2 border-teal-400 hover:bg-teal-50 text-teal-700 font-medium transition-all duration-200"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Switch to Chat</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+        </div>
       </motion.aside>
 
       {/* Mobile Drawer */}
@@ -832,13 +838,13 @@ export default function BuilderPage() {
 
             {/* Drawer */}
             <motion.div
-              className="fixed left-0 top-0 h-full w-80 bg-gradient-to-br from-white via-teal-50/20 to-slate-50/30 backdrop-blur-sm shadow-2xl z-50 overflow-y-auto lg:hidden"
+              className="fixed left-0 top-0 h-full w-80 bg-gradient-to-br from-white via-teal-50/20 to-slate-50/30 backdrop-blur-sm shadow-2xl z-50 overflow-y-auto lg:hidden flex flex-col scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500"
               initial={{ x: -320 }}
               animate={{ x: 0 }}
               exit={{ x: -320 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
             >
-              <div className="p-6 space-y-4">
+              <div className="flex-1 p-6 space-y-4 overflow-y-auto scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500">
                 {/* Close Button */}
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-bold text-gray-800">Navigation</h2>
@@ -985,6 +991,19 @@ export default function BuilderPage() {
                     )
                   })}
                 </div>
+              </div>
+
+              {/* Switch to Chat Button */}
+              <div className="p-4 pt-6 border-t border-gray-200/50 mt-6">
+                <Button
+                  onClick={handleSwitchToChat}
+                  variant="outline"
+                  className="w-full h-12 items-center justify-center gap-2 border-2 border-teal-400 hover:bg-teal-50 text-teal-700 font-medium transition-all duration-200"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Switch to Chat</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
               </div>
             </motion.div>
           </>

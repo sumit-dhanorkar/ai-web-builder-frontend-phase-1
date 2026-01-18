@@ -6,19 +6,22 @@
  */
 
 import { useState, useEffect } from 'react'
-import { ArrowRight, Loader2, Building2, Mail, Phone, Package, Globe, Edit2, Check, X, Folder, ShoppingBag, Sparkles, RefreshCw, FileText, Users, Palette } from 'lucide-react'
+import { ArrowRight, Loader2, Building2, Mail, Phone, Package, Globe, Edit2, Check, X, Folder, ShoppingBag, Sparkles, RefreshCw, FileText, Users, Palette, Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { useChat } from '@/lib/chat-context'
 import { ImageUploadWidget } from './ImageUploadWidget'
 import { MultiSelectWidget } from './MultiSelectWidget'
+import { DesignConfigWidget } from './DesignConfigWidget'
+import { ColorSchemeSelectWidget } from './ColorSchemeSelectWidget'
+import { GeneralSettingsWidget } from './GeneralSettingsWidget'
 import { toast } from 'sonner'
 
 interface SummaryReviewWidgetProps {
   field: string
   config?: {
-    section: 'business_info' | 'contact' | 'products' | 'export_countries' | 'certification' | 'certifications' | 'category' | 'product' | 'team_member' | 'design_config'
+    section: 'business_info' | 'contact' | 'products' | 'export_countries' | 'certification' | 'certifications' | 'category' | 'product' | 'team_member' | 'design_config' | 'general_settings'
     title: string
     next_section: string
   }
@@ -89,15 +92,41 @@ export function SummaryReviewWidget({
         export_countries: collectedData.export_countries || []
       })
     } else if (config.section === 'design_config') {
+      // Parse if JSON strings
+      let designConfig = collectedData.design_config
+      let designColors = collectedData.design_colors
+
+      if (typeof designConfig === 'string') {
+        try {
+          designConfig = JSON.parse(designConfig)
+        } catch (e) {}
+      }
+      if (typeof designColors === 'string') {
+        try {
+          designColors = JSON.parse(designColors)
+        } catch (e) {}
+      }
+
       setFormData({
-        website_config: collectedData.website_config || {
-          design_preferences: {
-            website_type: 'export',
-            theme: 'professional',
-            primary_color: '#0d9488',
-            secondary_color: '#10b981',
-            style: 'professional'
-          }
+        design_config: designConfig || { website_type: '', design_theme: '', visual_style: '' },
+        design_colors: designColors || { value: '', label: '', primary: '', secondary: '' }
+      })
+    } else if (config.section === 'general_settings') {
+      // Parse if JSON string
+      let generalSettings = collectedData.general_settings
+
+      if (typeof generalSettings === 'string') {
+        try {
+          generalSettings = JSON.parse(generalSettings)
+        } catch (e) {}
+      }
+
+      setFormData({
+        general_settings: generalSettings || {
+          seo_enabled: true,
+          email_config: { smtp_user: '', smtp_password: '' },
+          language: 'en',
+          currency: 'USD'
         }
       })
     }
@@ -302,8 +331,8 @@ export function SummaryReviewWidget({
           <>
             {/* AI Options for description fields */}
             {canUseAI && !value && showAIOptions && !isGeneratingAI && (
-              <div className="mb-3 p-4 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg border-2 border-purple-200 space-y-3">
-                <div className="flex items-center gap-2 text-sm text-purple-700 font-medium">
+              <div className="mb-3 p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-lg border-2 border-teal-200 space-y-3">
+                <div className="flex items-center gap-2 text-sm text-teal-700 font-medium">
                   <Sparkles className="w-4 h-4" />
                   AI Description Assistant
                 </div>
@@ -315,7 +344,7 @@ export function SummaryReviewWidget({
                     type="button"
                     onClick={() => handleGenerateAI(fieldName, aiContextType)}
                     disabled={disabled}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold text-sm"
+                    className="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold text-sm"
                   >
                     <Sparkles className="w-4 h-4 mr-2" />
                     Generate with AI
@@ -325,7 +354,7 @@ export function SummaryReviewWidget({
                     onClick={() => setShowAIOptions(false)}
                     disabled={disabled}
                     variant="outline"
-                    className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50 text-sm"
+                    className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50 text-sm"
                   >
                     Write Manually
                   </Button>
@@ -335,11 +364,11 @@ export function SummaryReviewWidget({
 
             {/* Generating State - replaces textarea during generation */}
             {canUseAI && isGeneratingAI ? (
-              <div className="p-4 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg border-2 border-purple-200 space-y-3">
+              <div className="p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-lg border-2 border-teal-200 space-y-3">
                 <div className="flex items-center justify-center py-4">
                   <div className="text-center">
-                    <Loader2 className="w-8 h-8 animate-spin text-purple-600 mx-auto mb-3" />
-                    <p className="text-sm text-purple-700 font-medium">
+                    <Loader2 className="w-8 h-8 animate-spin text-teal-600 mx-auto mb-3" />
+                    <p className="text-sm text-teal-700 font-medium">
                       AI is writing your description...
                     </p>
                   </div>
@@ -347,10 +376,10 @@ export function SummaryReviewWidget({
 
                 {/* Live preview */}
                 {value && (
-                  <div className="bg-white rounded-lg p-4 border border-purple-200 min-h-[100px]">
+                  <div className="bg-white rounded-lg p-4 border border-teal-200 min-h-[100px]">
                     <p className="text-sm text-gray-700 whitespace-pre-wrap">
                       {value}
-                      <span className="inline-block w-2 h-4 bg-purple-600 animate-pulse ml-1" />
+                      <span className="inline-block w-2 h-4 bg-teal-600 animate-pulse ml-1" />
                     </p>
                   </div>
                 )}
@@ -374,7 +403,7 @@ export function SummaryReviewWidget({
                     disabled={disabled}
                     variant="outline"
                     size="sm"
-                    className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+                    className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50"
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Regenerate with AI
@@ -416,6 +445,7 @@ export function SummaryReviewWidget({
           {config.section === 'certifications' && <FileText className="w-5 h-5 text-teal-600" />}
           {config.section === 'team_member' && <Users className="w-5 h-5 text-teal-600" />}
           {config.section === 'design_config' && <Palette className="w-5 h-5 text-teal-600" />}
+          {config.section === 'general_settings' && <Settings className="w-5 h-5 text-teal-600" />}
           <h3 className="text-lg font-bold text-gray-900">{config.title}</h3>
         </div>
 
@@ -787,118 +817,192 @@ export function SummaryReviewWidget({
           {/* Design Configuration Summary */}
           {config.section === 'design_config' && (
             <div className="space-y-4">
-              {formData.website_config?.design_preferences ? (
-                <>
-                  {/* Theme */}
-                  <div className="bg-white rounded-lg border-2 border-gray-200 p-4">
-                    <label className="text-sm font-medium text-gray-700 mb-2 block">Selected Theme</label>
+              {/* Website Type */}
+              <div className="bg-white rounded-lg border-2 border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700">Website Type</label>
+                  {!editingField || editingField !== 'website_type' ? (
+                    <button
+                      onClick={() => toggleEdit('website_type')}
+                      className="text-xs text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1"
+                      disabled={disabled}
+                    >
+                      <Edit2 className="w-3 h-3" /> Edit
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setEditingField(null)}
+                      className="text-xs text-green-600 hover:text-green-700 font-medium flex items-center gap-1"
+                    >
+                      <Check className="w-3 h-3" /> Done
+                    </button>
+                  )}
+                </div>
+                {editingField === 'website_type' ? (
+                  <DesignConfigWidget
+                    field="design_config"
+                    onComplete={(value) => {
+                      const parsed = JSON.parse(value)
+                      handleChange('design_config', parsed)
+                      setEditingField(null)
+                    }}
+                  />
+                ) : (
+                  <p className="text-base font-semibold text-gray-900 capitalize">
+                    {formData.design_config?.website_type || 'Not selected'}
+                  </p>
+                )}
+              </div>
+
+              {/* Design Theme */}
+              <div className="bg-white rounded-lg border-2 border-gray-200 p-4">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Design Theme</label>
+                <p className="text-base font-semibold text-gray-900 capitalize">
+                  {formData.design_config?.design_theme || 'Not selected'}
+                </p>
+              </div>
+
+              {/* Visual Style */}
+              <div className="bg-white rounded-lg border-2 border-gray-200 p-4">
+                <label className="text-sm font-medium text-gray-700 mb-2 block">Visual Style</label>
+                <p className="text-base font-semibold text-gray-900 capitalize">
+                  {formData.design_config?.visual_style || 'Not selected'}
+                </p>
+              </div>
+
+              {/* Color Scheme */}
+              <div className="bg-white rounded-lg border-2 border-gray-200 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="text-sm font-medium text-gray-700">Color Scheme</label>
+                  {!editingField || editingField !== 'colors' ? (
+                    <button
+                      onClick={() => toggleEdit('colors')}
+                      className="text-xs text-teal-600 hover:text-teal-700 font-medium flex items-center gap-1"
+                      disabled={disabled}
+                    >
+                      <Edit2 className="w-3 h-3" /> Edit
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setEditingField(null)}
+                      className="text-xs text-green-600 hover:text-green-700 font-medium flex items-center gap-1"
+                    >
+                      <Check className="w-3 h-3" /> Done
+                    </button>
+                  )}
+                </div>
+
+                {editingField === 'colors' ? (
+                  <ColorSchemeSelectWidget
+                    field="design_colors"
+                    onComplete={(value) => {
+                      const parsed = JSON.parse(value)
+                      handleChange('design_colors', parsed)
+                      setEditingField(null)
+                    }}
+                  />
+                ) : (
+                  <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <div
-                        className="w-16 h-16 rounded-lg border-2 border-gray-200"
-                        style={{
-                          background: `linear-gradient(135deg, ${formData.website_config.design_preferences.primary_color} 0%, ${formData.website_config.design_preferences.primary_color}dd 100%)`
-                        }}
+                        className="w-12 h-12 rounded-lg border-2 border-gray-200 shadow-sm"
+                        style={{ backgroundColor: formData.design_colors?.primary || '#0F766E' }}
                       />
                       <div>
-                        <p className="text-base font-semibold text-gray-900 capitalize">
-                          {formData.website_config.design_preferences.theme || 'Professional'}
-                        </p>
-                        <p className="text-xs text-gray-500 capitalize">
-                          {formData.website_config.design_preferences.website_type || 'Export'} Website
-                        </p>
+                        <p className="text-xs text-gray-500">Primary</p>
+                        <p className="text-sm font-mono text-gray-900">{formData.design_colors?.primary || '#0F766E'}</p>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Color Scheme */}
-                  <div className="bg-white rounded-lg border-2 border-gray-200 p-4">
-                    <label className="text-sm font-medium text-gray-700 mb-3 block">Color Scheme</label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Primary Color */}
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-12 h-12 rounded-lg border-2 border-gray-200 shadow-sm"
+                        style={{ backgroundColor: formData.design_colors?.secondary || '#14B8A6' }}
+                      />
                       <div>
-                        <p className="text-xs text-gray-500 mb-2">Primary Color</p>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-10 h-10 rounded-lg border-2 border-gray-200"
-                            style={{ backgroundColor: formData.website_config.design_preferences.primary_color }}
-                          />
-                          <span className="text-xs font-mono text-gray-600">
-                            {formData.website_config.design_preferences.primary_color}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Secondary Color */}
-                      <div>
-                        <p className="text-xs text-gray-500 mb-2">Secondary Color</p>
-                        <div className="flex items-center gap-2">
-                          <div
-                            className="w-10 h-10 rounded-lg border-2 border-gray-200"
-                            style={{ backgroundColor: formData.website_config.design_preferences.secondary_color }}
-                          />
-                          <span className="text-xs font-mono text-gray-600">
-                            {formData.website_config.design_preferences.secondary_color}
-                          </span>
-                        </div>
+                        <p className="text-xs text-gray-500">Secondary</p>
+                        <p className="text-sm font-mono text-gray-900">{formData.design_colors?.secondary || '#14B8A6'}</p>
                       </div>
                     </div>
+                    {formData.design_colors?.label && (
+                      <p className="text-xs text-gray-600 pt-2 border-t border-gray-200">
+                        Selected: <span className="font-medium">{formData.design_colors.label}</span>
+                      </p>
+                    )}
                   </div>
+                )}
+              </div>
+            </div>
+          )}
 
-                  {/* Website Features */}
+          {/* General Settings Section */}
+          {config.section === 'general_settings' && (
+            <div className="space-y-4">
+              {/* Edit Button */}
+              {!editingField && (
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setEditingField('general_settings')}
+                    className="flex items-center gap-2 px-4 py-2 text-sm text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg transition-colors"
+                  >
+                    <Edit2 className="w-4 h-4" />
+                    Edit Settings
+                  </button>
+                </div>
+              )}
+
+              {editingField === 'general_settings' ? (
+                <GeneralSettingsWidget
+                  field="general_settings"
+                  onComplete={(value) => {
+                    const parsed = JSON.parse(value)
+                    handleChange('general_settings', parsed)
+                    setEditingField(null)
+                  }}
+                />
+              ) : (
+                <div className="space-y-4">
+                  {/* SEO Enabled */}
                   <div className="bg-white rounded-lg border-2 border-gray-200 p-4">
-                    <label className="text-sm font-medium text-gray-700 mb-3 block">Enabled Features</label>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      {formData.website_config.seo_enabled && (
-                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                          <Check className="w-3 h-3 text-green-600" />
-                          <span className="text-gray-700">SEO Optimization</span>
-                        </div>
-                      )}
-                      {formData.website_config.pages?.home?.enabled_sections?.hero_carousel && (
-                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                          <Check className="w-3 h-3 text-green-600" />
-                          <span className="text-gray-700">Hero Carousel</span>
-                        </div>
-                      )}
-                      {formData.website_config.pages?.home?.enabled_sections?.product_categories && (
-                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                          <Check className="w-3 h-3 text-green-600" />
-                          <span className="text-gray-700">Product Showcase</span>
-                        </div>
-                      )}
-                      {formData.website_config.pages?.about?.enabled_sections?.team && (
-                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                          <Check className="w-3 h-3 text-green-600" />
-                          <span className="text-gray-700">Team Section</span>
-                        </div>
-                      )}
-                      {formData.website_config.pages?.contact?.enabled_sections?.contact_form && (
-                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                          <Check className="w-3 h-3 text-green-600" />
-                          <span className="text-gray-700">Contact Form</span>
-                        </div>
-                      )}
-                      {formData.website_config.pages?.home?.enabled_sections?.global_presence && (
-                        <div className="flex items-center gap-2 p-2 bg-green-50 rounded-lg">
-                          <Check className="w-3 h-3 text-green-600" />
-                          <span className="text-gray-700">Global Presence</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Info Message */}
-                  <div className="bg-teal-50 border border-teal-200 rounded-lg p-3">
-                    <p className="text-xs text-teal-800">
-                      <Sparkles className="w-4 h-4 inline mr-1" />
-                      This configuration was automatically optimized based on your business type and collected information.
+                    <label className="text-sm font-medium text-gray-700 mb-2 block">SEO Optimization</label>
+                    <p className="text-base font-semibold text-gray-900">
+                      {formData.general_settings?.seo_enabled ? '✓ Enabled' : '✗ Disabled'}
                     </p>
                   </div>
-                </>
-              ) : (
-                <div className="text-center py-8 text-gray-400">
-                  <Palette className="w-12 h-12 mx-auto mb-2 opacity-50" />
-                  <p>No design configuration available</p>
+
+                  {/* Email Configuration */}
+                  <div className="bg-white rounded-lg border-2 border-gray-200 p-4">
+                    <label className="text-sm font-medium text-gray-700 mb-3 block">Email Configuration</label>
+                    <div className="space-y-2">
+                      <div>
+                        <p className="text-xs text-gray-500">SMTP User</p>
+                        <p className="text-base font-semibold text-gray-900">
+                          {formData.general_settings?.email_config?.smtp_user || 'Not configured'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500">SMTP Password</p>
+                        <p className="text-base font-semibold text-gray-900">
+                          {formData.general_settings?.email_config?.smtp_password ? '••••••••' : 'Not configured'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Language & Currency */}
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-white rounded-lg border-2 border-gray-200 p-4">
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Language</label>
+                      <p className="text-base font-semibold text-gray-900 uppercase">
+                        {formData.general_settings?.language || 'EN'}
+                      </p>
+                    </div>
+                    <div className="bg-white rounded-lg border-2 border-gray-200 p-4">
+                      <label className="text-sm font-medium text-gray-700 mb-2 block">Currency</label>
+                      <p className="text-base font-semibold text-gray-900 uppercase">
+                        {formData.general_settings?.currency || 'USD'}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

@@ -225,18 +225,6 @@ function ChatPageContent() {
                 <span>AI Chat Mode</span>
               </motion.div>
 
-              {/* Switch to Form Button */}
-              <Button
-                onClick={handleSwitchToForm}
-                variant="outline"
-                size="sm"
-                className="hidden md:flex items-center gap-2 border-2 border-indigo-400 hover:bg-indigo-50 text-indigo-700 font-medium transition-all duration-200"
-              >
-                <FileText className="w-4 h-4" />
-                Switch to Manual Form
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-
               {/* Profile Dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -356,13 +344,30 @@ function ChatPageContent() {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-        <div className="h-full overflow-y-auto py-4">
-          <EnhancedProgressDisplay
-            currentStep={currentStep}
-            steps={chatSteps}
-            onStepClick={undefined} // Chat doesn't support manual step jumping
-            isCollapsed={isSidebarCollapsed}
-          />
+        <div className="h-full overflow-y-auto py-4 flex flex-col scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500">
+          <div className="flex-1">
+            <EnhancedProgressDisplay
+              currentStep={currentStep}
+              steps={chatSteps}
+              onStepClick={undefined} // Chat doesn't support manual step jumping
+              isCollapsed={isSidebarCollapsed}
+            />
+          </div>
+
+          {/* Switch to Manual Form Button */}
+          {!isSidebarCollapsed && (
+            <div className="px-4 pb-4 pt-6 mt-6 border-t border-gray-200/50">
+              <Button
+                onClick={handleSwitchToForm}
+                variant="outline"
+                className="w-full h-12 items-center justify-center gap-2 border-2 border-teal-400 hover:bg-teal-50 text-teal-700 font-medium transition-all duration-200"
+              >
+                <FileText className="w-4 h-4" />
+                <span>Switch to Manual Form</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </motion.aside>
 
@@ -394,19 +399,32 @@ function ChatPageContent() {
             />
 
             <motion.div
-              className="fixed left-0 top-20 bottom-0 w-80 bg-white shadow-2xl z-50 lg:hidden overflow-y-auto"
+              className="fixed left-0 top-20 bottom-0 w-80 bg-white shadow-2xl z-50 lg:hidden overflow-y-auto flex flex-col scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500"
               initial={{ x: -320 }}
               animate={{ x: 0 }}
               exit={{ x: -320 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              <div className="p-4">
+              <div className="flex-1 p-4">
                 <EnhancedProgressDisplay
                   currentStep={currentStep}
                   steps={chatSteps}
                   onStepClick={undefined}
                   isCollapsed={false}
                 />
+              </div>
+
+              {/* Switch to Manual Form Button */}
+              <div className="p-4 pt-6 border-t border-gray-200 mt-6">
+                <Button
+                  onClick={handleSwitchToForm}
+                  variant="outline"
+                  className="w-full h-12 items-center justify-center gap-2 border-2 border-teal-400 hover:bg-teal-50 text-teal-700 font-medium transition-all duration-200"
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>Switch to Manual Form</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
               </div>
             </motion.div>
           </>

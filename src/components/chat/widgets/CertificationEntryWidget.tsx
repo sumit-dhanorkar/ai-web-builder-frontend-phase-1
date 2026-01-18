@@ -199,8 +199,8 @@ export function CertificationEntryWidget({
 
         {/* Initial State - Choose AI or Manual */}
         {!formData.description && !showDescriptionTextarea && !isGeneratingAI && (
-          <div className="p-4 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg border-2 border-purple-200 space-y-3">
-            <div className="flex items-center gap-2 text-sm text-purple-700 font-medium">
+          <div className="p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-lg border-2 border-teal-200 space-y-3">
+            <div className="flex items-center gap-2 text-sm text-teal-700 font-medium">
               <Sparkles className="w-4 h-4" />
               AI Description Assistant
             </div>
@@ -212,7 +212,7 @@ export function CertificationEntryWidget({
                 type="button"
                 onClick={handleGenerateAI}
                 disabled={disabled || !formData.name}
-                className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold"
+                className="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Generate with AI
@@ -222,7 +222,7 @@ export function CertificationEntryWidget({
                 onClick={handleWriteManually}
                 disabled={disabled}
                 variant="outline"
-                className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+                className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50"
               >
                 Write Manually
               </Button>
@@ -237,11 +237,11 @@ export function CertificationEntryWidget({
 
         {/* Generating State */}
         {isGeneratingAI && (
-          <div className="p-4 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg border-2 border-purple-200 space-y-3">
+          <div className="p-4 bg-gradient-to-br from-teal-50 to-emerald-50 rounded-lg border-2 border-teal-200 space-y-3">
             <div className="flex items-center justify-center py-4">
               <div className="text-center">
-                <Loader2 className="w-8 h-8 animate-spin text-purple-600 mx-auto mb-3" />
-                <p className="text-sm text-purple-700 font-medium">
+                <Loader2 className="w-8 h-8 animate-spin text-teal-600 mx-auto mb-3" />
+                <p className="text-sm text-teal-700 font-medium">
                   AI is writing your description...
                 </p>
                 <p className="text-xs text-gray-600 mt-1">
@@ -252,10 +252,10 @@ export function CertificationEntryWidget({
 
             {/* Live preview of generation */}
             {aiGeneratedDescription && (
-              <div className="bg-white rounded-lg p-4 border border-purple-200 min-h-[80px]">
+              <div className="bg-white rounded-lg p-4 border border-teal-200 min-h-[80px]">
                 <p className="text-sm text-gray-700 whitespace-pre-wrap">
                   {aiGeneratedDescription}
-                  <span className="inline-block w-2 h-4 bg-purple-600 animate-pulse ml-1" />
+                  <span className="inline-block w-2 h-4 bg-teal-600 animate-pulse ml-1" />
                 </p>
               </div>
             )}
@@ -271,7 +271,7 @@ export function CertificationEntryWidget({
               placeholder="Describe what this certification covers and its significance..."
               disabled={disabled}
               rows={4}
-              className="border-2 border-purple-200 focus:border-purple-500 transition-colors"
+              className="border-2 border-teal-200 focus:border-teal-500 transition-colors"
             />
 
             <div className="flex gap-2">
@@ -282,7 +282,7 @@ export function CertificationEntryWidget({
                   disabled={disabled || !formData.name}
                   variant="outline"
                   size="sm"
-                  className="border-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+                  className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   Regenerate with AI
