@@ -91,8 +91,8 @@ export default function HomePage() {
     // Check backend for active job
     const hasActiveJob = await checkAndRedirect()
     if (!hasActiveJob) {
-      // No active job, proceed to builder
-      router.push('/builder')
+      // No active job, proceed to choice screen
+      router.push('/builder/choose')
     }
   }
 

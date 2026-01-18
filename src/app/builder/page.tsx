@@ -63,7 +63,8 @@ import {
   User,
   ChevronDown,
   LogOut,
-  LayoutDashboard
+  LayoutDashboard,
+  MessageSquare
 } from 'lucide-react'
 import { 
   FaLinkedin, 
@@ -94,6 +95,8 @@ import { useAuth } from '@/lib/auth-context'
 import { apiClient } from '@/lib/api-client'
 import { jobStateManager } from '@/lib/job-state'
 import { Loader } from 'lucide-react'
+import { EnhancedProgressDisplay } from '@/components/EnhancedProgressDisplay'
+import { loadChatDataFromStorage, syncChatToForm, saveChatDataToStorage, clearChatDataFromStorage } from '@/lib/state-sync'
 
 interface BusinessInfo {
   company_name: string
@@ -408,6 +411,22 @@ export default function BuilderPage() {
     checkActiveJob()
   }, [isAuthenticated, loading, router, user])
 
+  // Load chat data from localStorage if available
+  useEffect(() => {
+    const chatData = loadChatDataFromStorage()
+    if (chatData && Object.keys(chatData).length > 0) {
+      console.log('📥 Loading data from chatbot...')
+      const mergedData = syncChatToForm(chatData)
+      setBusinessInfo(mergedData)
+      toast.success('Loaded data from chat session!', {
+        description: 'Your conversation data has been imported'
+      })
+      // Clear chat data after loading to prevent re-loading on refresh
+      // Comment this out if you want to keep chat data for multiple switches
+      clearChatDataFromStorage()
+    }
+  }, [])
+
   useEffect(() => {
     const checkDesktop = () => {
       setIsDesktop(window.innerWidth >= 1024)
@@ -490,6 +509,17 @@ export default function BuilderPage() {
     } catch (error) {
       console.error('Logout error:', error)
     }
+  }
+
+  const handleSwitchToChat = () => {
+    // Save current form data to localStorage
+    console.log('💾 Saving form data for chat...')
+    saveChatDataToStorage(businessInfo)
+    toast.success('Switching to chat mode...', {
+      description: 'Your form data will be preserved'
+    })
+    // Navigate to chat page
+    router.push('/builder/chat')
   }
 
   const addCategory = () => {
@@ -645,6 +675,18 @@ export default function BuilderPage() {
                 <span>AI-Powered Builder</span>
               </motion.div>
 
+              {/* Switch to Chat Button */}
+              <Button
+                onClick={handleSwitchToChat}
+                variant="outline"
+                size="sm"
+                className="hidden md:flex items-center gap-2 border-2 border-teal-400 hover:bg-teal-50 text-teal-700 font-medium transition-all duration-200"
+              >
+                <MessageSquare className="w-4 h-4" />
+                Switch to Chat
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+
               {/* Profile Dropdown */}
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -767,235 +809,12 @@ export default function BuilderPage() {
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
 
-        <div className={`p-4 space-y-3 ${isSidebarCollapsed ? 'px-2' : ''}`}>
-          {/* Progress Circle */}
-          {isSidebarCollapsed ? (
-            // Compact Progress Circle for Collapsed State
-            <motion.div
-              className="w-14 h-14 flex items-center justify-center bg-gradient-to-br from-teal-500/10 to-slate-500/10 rounded-xl border border-teal-200/50 shadow-lg mx-auto"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="relative w-12 h-12">
-                <svg className="transform -rotate-90 w-12 h-12">
-                  <circle
-                    cx="24"
-                    cy="24"
-                    r="20"
-                    stroke="#e5e7eb"
-                    strokeWidth="3"
-                    fill="none"
-                  />
-                  <motion.circle
-                    cx="24"
-                    cy="24"
-                    r="20"
-                    stroke="url(#sidebar-gradient-collapsed)"
-                    strokeWidth="3"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 20}`}
-                    initial={{ strokeDashoffset: 2 * Math.PI * 20 }}
-                    animate={{
-                      strokeDashoffset: 2 * Math.PI * 20 * (1 - (currentStep + 1) / steps.length)
-                    }}
-                    transition={{ duration: 1, ease: "easeInOut" }}
-                  />
-                  <defs>
-                    <linearGradient id="sidebar-gradient-collapsed" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#14b8a6" />
-                      <stop offset="100%" stopColor="#64748b" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-xs font-bold text-teal-600">
-                      {Math.round(((currentStep + 1) / steps.length) * 100)}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ) : (
-            // Compact Progress Circle for Expanded State
-            <motion.div
-              className="flex flex-col items-center py-3 bg-gradient-to-br from-teal-500/10 to-slate-500/10 rounded-xl border border-teal-200/50 shadow-lg"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="relative w-16 h-16 mb-2">
-                <svg className="transform -rotate-90 w-16 h-16">
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    stroke="#e5e7eb"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <motion.circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    stroke="url(#sidebar-gradient)"
-                    strokeWidth="4"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 28}`}
-                    initial={{ strokeDashoffset: 2 * Math.PI * 28 }}
-                    animate={{
-                      strokeDashoffset: 2 * Math.PI * 28 * (1 - (currentStep + 1) / steps.length)
-                    }}
-                    transition={{ duration: 1, ease: "easeInOut" }}
-                  />
-                  <defs>
-                    <linearGradient id="sidebar-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#14b8a6" />
-                      <stop offset="100%" stopColor="#64748b" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-teal-600">
-                      {Math.round(((currentStep + 1) / steps.length) * 100)}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="text-sm font-bold text-gray-800">Step {currentStep + 1} of {steps.length}</div>
-            </motion.div>
-          )}
-
-          {/* Step Navigation */}
-          <div className="space-y-2">
-            {steps.map((step, index) => {
-              const isActive = index === currentStep
-              const isCompleted = index < currentStep
-              const StepIcon = step.icon
-
-              return (
-                <motion.div
-                  key={step.id}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.1 * index + 0.3 }}
-                  onClick={() => setCurrentStep(index)}
-                  className="relative cursor-pointer group"
-                >
-                  {isSidebarCollapsed ? (
-                    // Collapsed View - Only Icons
-                    <motion.div
-                      className={`relative w-14 h-14 rounded-xl transition-all duration-300 flex items-center justify-center ${
-                        isActive
-                          ? 'bg-gradient-to-r from-teal-500 to-slate-600 text-white shadow-xl'
-                          : isCompleted
-                            ? 'bg-gradient-to-r from-teal-50 to-slate-50 hover:from-teal-100 hover:to-slate-100 border-2 border-teal-300 shadow-md'
-                            : 'bg-white/50 border-2 border-gray-200 hover:border-gray-300'
-                      }`}
-                      whileHover={{ scale: 1.05 }}
-                      title={step.title}
-                    >
-                      <motion.div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          isActive
-                            ? 'bg-white/20 backdrop-blur-sm'
-                            : isCompleted
-                              ? 'bg-gradient-to-br from-teal-500 to-slate-600'
-                              : 'bg-gray-100'
-                        }`}
-                        animate={isActive ? {
-                          scale: [1, 1.1, 1],
-                          rotate: [0, 5, -5, 0]
-                        } : {}}
-                        transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
-                      >
-                        {isCompleted ? (
-                          <Check className="w-5 h-5 text-white" />
-                        ) : (
-                          <StepIcon className={`w-5 h-5 ${
-                            isActive ? 'text-white' : isCompleted ? 'text-white' : 'text-gray-500'
-                          }`} />
-                        )}
-                      </motion.div>
-                      {/* Connection Line */}
-                      {index < steps.length - 1 && (
-                        <div className="absolute left-1/2 top-full w-0.5 h-3 bg-gradient-to-b from-teal-300 to-transparent -translate-x-1/2" />
-                      )}
-                    </motion.div>
-                  ) : (
-                    // Expanded View - Compact Details
-                    <>
-                      <div className={`p-3 rounded-xl transition-all duration-300 ${
-                        isActive
-                          ? 'bg-gradient-to-r from-teal-500 to-slate-600 text-white shadow-xl'
-                          : isCompleted
-                            ? 'bg-gradient-to-r from-teal-50 to-slate-50 hover:from-teal-100 hover:to-slate-100 border-2 border-teal-300 shadow-md'
-                            : 'bg-white/50 border-2 border-gray-200 hover:border-gray-300'
-                      }`}>
-                        <div className="flex items-center space-x-3">
-                          {/* Step Number/Icon */}
-                          <motion.div
-                            className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                              isActive
-                                ? 'bg-white/20 backdrop-blur-sm'
-                                : isCompleted
-                                  ? 'bg-gradient-to-br from-teal-500 to-slate-600'
-                                  : 'bg-gray-100'
-                            }`}
-                            animate={isActive ? {
-                              scale: [1, 1.1, 1],
-                              rotate: [0, 5, -5, 0]
-                            } : {}}
-                            transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
-                          >
-                            {isCompleted ? (
-                              <Check className="w-5 h-5 text-white" />
-                            ) : (
-                              <StepIcon className={`w-5 h-5 ${
-                                isActive ? 'text-white' : isCompleted ? 'text-white' : 'text-gray-500'
-                              }`} />
-                            )}
-                          </motion.div>
-
-                          {/* Step Content */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-0.5">
-                              <h4 className={`font-bold text-sm ${
-                                isActive ? 'text-white' : isCompleted ? 'text-gray-900' : 'text-gray-700'
-                              }`}>
-                                {step.title}
-                              </h4>
-                              {isCompleted && (
-                                <Check className="w-4 h-4 text-teal-500 flex-shrink-0" />
-                              )}
-                            </div>
-                            <p className={`text-xs leading-tight ${
-                              isActive ? 'text-teal-100' : 'text-gray-600'
-                            }`}>
-                              {step.description}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Vertical Connection Line */}
-                      {index < steps.length - 1 && (
-                        <div className="absolute left-8 top-full w-0.5 h-2 bg-gradient-to-b from-teal-300 to-transparent" />
-                      )}
-                    </>
-                  )}
-                </motion.div>
-              )
-            })}
-          </div>
-
-        </div>
+        <EnhancedProgressDisplay
+          currentStep={currentStep}
+          steps={steps}
+          onStepClick={setCurrentStep}
+          isCollapsed={isSidebarCollapsed}
+        />
       </motion.aside>
 
       {/* Mobile Drawer */}
