@@ -212,7 +212,7 @@ export function CertificationEntryWidget({
                 type="button"
                 onClick={handleGenerateAI}
                 disabled={disabled || !formData.name}
-                className="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold"
+                className="flex-1 h-9 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium text-sm"
               >
                 <Sparkles className="w-4 h-4 mr-2" />
                 Generate with AI
@@ -222,7 +222,7 @@ export function CertificationEntryWidget({
                 onClick={handleWriteManually}
                 disabled={disabled}
                 variant="outline"
-                className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50"
+                className="h-9 border border-teal-300 text-teal-700 hover:bg-teal-50 text-sm"
               >
                 Write Manually
               </Button>
@@ -282,9 +282,9 @@ export function CertificationEntryWidget({
                   disabled={disabled || !formData.name}
                   variant="outline"
                   size="sm"
-                  className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50"
+                  className="h-8 border border-teal-300 text-teal-700 hover:bg-teal-50 text-xs"
                 >
-                  <Sparkles className="w-4 h-4 mr-2" />
+                  <Sparkles className="w-3 h-3 mr-1" />
                   Regenerate with AI
                 </Button>
               )}
@@ -297,7 +297,7 @@ export function CertificationEntryWidget({
       <Button
         onClick={handleSubmit}
         disabled={disabled || !isValid}
-        className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold"
+        className="w-full h-10 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium text-sm shadow-md"
       >
         <Check className="w-4 h-4 mr-2" />
         Add Certification

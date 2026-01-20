@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Bot, User, Loader2 } from 'lucide-react'
+import { Bot, User, Loader2, CheckCircle } from 'lucide-react'
 import type { Message as MessageType } from '@/types/chatbot'
 import ReactMarkdown from 'react-markdown'
 import { WidgetRenderer } from './widgets/WidgetRenderer'
@@ -147,12 +147,14 @@ export function Message({ message, isLatest }: MessageProps) {
               {isUser && isImageUrl(message.content) ? (
                 // Simple text for uploaded images
                 <div className="flex items-center gap-2 text-sm">
-                  <span>✅ Uploaded: {getFilename(message.content)}</span>
+                  <CheckCircle />
+                  <span> Uploaded: {getFilename(message.content)}</span>
                 </div>
               ) : isUser && isJsonReviewData(message.content) ? (
                 // Simple text for JSON review data
                 <div className="flex items-center gap-2 text-sm">
-                  <span>✅ Updated information and continuing</span>
+                  <CheckCircle />
+                  <span> Updated information and continuing</span>
                 </div>
               ) : isUser && isExportCountriesArray(message.content) ? (
                 // Format export countries nicely

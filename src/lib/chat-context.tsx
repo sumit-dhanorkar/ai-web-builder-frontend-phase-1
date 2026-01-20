@@ -269,7 +269,18 @@ export function ChatProvider({ children }: ChatProviderProps) {
           console.log('📦 Stream completed with data:', data)
           console.log('🎨 Widget received:', data.widget)
 
-          // Update message status
+          // CRITICAL: Update collected data FIRST before adding widget to message
+          // This ensures the widget has access to the latest data when it mounts
+          if (data.updated_data) {
+            setCollectedData(data.updated_data)
+          }
+
+          // Update state
+          if (data.next_state) {
+            setCurrentState(data.next_state)
+          }
+
+          // Now update message with widget (after collectedData is set)
           setMessages(prev =>
             prev.map(msg => {
               if (msg.id === userMessage.id) {
@@ -287,16 +298,6 @@ export function ChatProvider({ children }: ChatProviderProps) {
               return msg
             })
           )
-
-          // Update state
-          if (data.next_state) {
-            setCurrentState(data.next_state)
-          }
-
-          // Update collected data if backend sent updates
-          if (data.updated_data) {
-            setCollectedData(data.updated_data)
-          }
 
           if (data.progress) {
             setProgress({

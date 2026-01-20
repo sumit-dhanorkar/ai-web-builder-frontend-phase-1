@@ -179,7 +179,7 @@ export function DesignConfigWidget({
       <Button
         onClick={handleSubmit}
         disabled={disabled || !isValid || isSubmitting}
-        className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold h-12"
+        className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium text-sm h-10 shadow-md"
       >
         {isSubmitting ? (
           <>

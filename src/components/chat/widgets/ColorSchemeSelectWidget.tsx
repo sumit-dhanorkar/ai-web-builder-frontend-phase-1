@@ -103,7 +103,7 @@ export function ColorSchemeSelectWidget({
       <Button
         onClick={handleConfirm}
         disabled={disabled || !selectedScheme}
-        className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold h-12"
+        className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium text-sm h-10 shadow-md"
       >
         <Check className="w-4 h-4 mr-2" />
         {selectedScheme

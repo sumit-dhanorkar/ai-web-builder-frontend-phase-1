@@ -163,7 +163,7 @@ export function AIDescriptionWidget({
             <Button
               onClick={handleGenerateAI}
               disabled={disabled}
-              className="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold"
+              className="flex-1 h-9 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium text-sm"
             >
               <Sparkles className="w-4 h-4 mr-2" />
               Generate with AI
@@ -172,7 +172,7 @@ export function AIDescriptionWidget({
               onClick={handleManual}
               disabled={disabled}
               variant="outline"
-              className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50"
+              className="h-9 border border-teal-300 text-teal-700 hover:bg-teal-50 text-sm"
             >
               Write Manually
             </Button>
@@ -240,7 +240,7 @@ export function AIDescriptionWidget({
             <Button
               onClick={handleAccept}
               disabled={disabled || description.trim().length < minLength}
-              className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold"
+              className="flex-1 h-9 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-medium text-sm shadow-md"
             >
               <Check className="w-4 h-4 mr-2" />
               Use This Description
@@ -250,7 +250,7 @@ export function AIDescriptionWidget({
                 onClick={handleRegenerate}
                 disabled={disabled}
                 variant="outline"
-                className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50"
+                className="h-9 border border-teal-300 text-teal-700 hover:bg-teal-50 text-sm"
               >
                 <RefreshCw className="w-4 h-4 mr-2" />
                 Regenerate
@@ -260,7 +260,7 @@ export function AIDescriptionWidget({
               onClick={handleCancel}
               disabled={disabled}
               variant="ghost"
-              className="text-gray-600 hover:bg-gray-100"
+              className="h-9 text-gray-600 hover:bg-gray-100"
             >
               <X className="w-4 h-4" />
             </Button>

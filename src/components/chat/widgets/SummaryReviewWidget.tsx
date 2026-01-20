@@ -5,8 +5,8 @@
  * Shows section summary with read-only fields and individual edit buttons
  */
 
-import { useState, useEffect } from 'react'
-import { ArrowRight, Loader2, Building2, Mail, Phone, Package, Globe, Edit2, Check, X, Folder, ShoppingBag, Sparkles, RefreshCw, FileText, Users, Palette, Settings } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { ArrowRight, Loader2, Building2, Mail, Phone, Package, Globe, Edit2, Check, X, Folder, ShoppingBag, Sparkles, RefreshCw, FileText, Users, Palette, Settings, Plus, CheckCircle, SkipForward, LucideIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -18,12 +18,26 @@ import { ColorSchemeSelectWidget } from './ColorSchemeSelectWidget'
 import { GeneralSettingsWidget } from './GeneralSettingsWidget'
 import { toast } from 'sonner'
 
+// Map icon names to Lucide components
+const iconMap: Record<string, LucideIcon> = {
+  Plus,
+  CheckCircle,
+  Users,
+  SkipForward,
+}
+
 interface SummaryReviewWidgetProps {
   field: string
   config?: {
     section: 'business_info' | 'contact' | 'products' | 'export_countries' | 'certification' | 'certifications' | 'category' | 'product' | 'team_member' | 'design_config' | 'general_settings'
     title: string
     next_section: string
+    actions?: Array<{
+      label: string
+      value: string
+      variant?: 'default' | 'outline'
+      icon?: string
+    }>
   }
   onComplete: (value: string) => void
   disabled?: boolean
@@ -39,13 +53,22 @@ export function SummaryReviewWidget({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<any>({})
   const [editingField, setEditingField] = useState<string | null>(null)
+  const isDataInitialized = useRef(false)
 
   // AI Description states
   const [isGeneratingAI, setIsGeneratingAI] = useState(false)
   const [showAIOptions, setShowAIOptions] = useState(false)
 
-  // Initialize form data from collected data
+  // Initialize form data from collected data - ONLY ONCE when widget first mounts
   useEffect(() => {
+    // Skip if already initialized to prevent data loss when collectedData changes
+    if (isDataInitialized.current) {
+      return
+    }
+
+    // Mark as initialized
+    isDataInitialized.current = true
+
     console.log('📊 SummaryReviewWidget - Section:', config.section)
     console.log('📊 SummaryReviewWidget - collectedData:', collectedData)
 
@@ -1010,29 +1033,72 @@ export function SummaryReviewWidget({
         </div>
       </div>
 
-      {/* Save & Continue Button */}
-      <Button
-        onClick={handleSaveAndContinue}
-        disabled={disabled || isSubmitting}
-        className="w-full h-14 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold text-base transition-all hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {isSubmitting && !disabled ? (
-          <>
-            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-            Saving...
-          </>
-        ) : (
-          <>
-            Save & Continue to {config.next_section}
-            <ArrowRight className="w-5 h-5 ml-2" />
-          </>
-        )}
-      </Button>
+      {/* Action Buttons or Save & Continue */}
+      {config.actions && config.actions.length > 0 ? (
+        <>
+          {/* Action Buttons (for add more decisions) */}
+          <div className="space-y-2">
+            <p className="text-xs font-medium text-gray-600 text-center">
+              {config.section === 'product' && 'Add another product?'}
+              {config.section === 'certification' && 'Add another certification?'}
+              {config.section === 'team_member' && 'Add another team member?'}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {config.actions.map((action, index) => {
+                const IconComponent = action.icon ? iconMap[action.icon] : null
+                return (
+                  <Button
+                    key={action.value}
+                    onClick={() => onComplete(action.value)}
+                    disabled={disabled || isSubmitting}
+                    variant={action.variant === 'outline' ? 'outline' : 'default'}
+                    className={`h-9 font-medium text-sm transition-all ${
+                      action.variant === 'outline'
+                        ? 'border border-teal-400 hover:bg-teal-50 text-teal-700'
+                        : 'bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white shadow-md'
+                    }`}
+                  >
+                    {IconComponent && (
+                      <IconComponent className="w-4 h-4 mr-2" />
+                    )}
+                    {action.label}
+                  </Button>
+                )
+              })}
+            </div>
+          </div>
+          {/* Helper Text */}
+          <p className="text-xs text-center text-gray-500">
+            Click "Edit" next to any field to make changes before choosing
+          </p>
+        </>
+      ) : (
+        <>
+          {/* Regular Save & Continue Button */}
+          <Button
+            onClick={handleSaveAndContinue}
+            disabled={disabled || isSubmitting}
+            className="w-full h-10 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium text-sm transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting && !disabled ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Saving...
+              </>
+            ) : (
+              <>
+                Save & Continue to {config.next_section}
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </>
+            )}
+          </Button>
 
-      {/* Helper Text */}
-      <p className="text-xs text-center text-gray-500">
-        Click "Edit" next to any field to make changes, then "Save & Continue" when ready
-      </p>
+          {/* Helper Text */}
+          <p className="text-xs text-center text-gray-500">
+            Click "Edit" next to any field to make changes, then "Save & Continue" when ready
+          </p>
+        </>
+      )}
     </div>
   )
 }

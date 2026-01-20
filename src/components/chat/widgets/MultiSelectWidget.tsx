@@ -84,7 +84,7 @@ export function MultiSelectWidget({
       <Button
         onClick={handleComplete}
         disabled={disabled || selectedValues.length === 0}
-        className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold"
+        className="w-full h-10 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium text-sm shadow-md"
       >
         <Check className="w-4 h-4 mr-2" />
         Done ({selectedValues.length} selected)

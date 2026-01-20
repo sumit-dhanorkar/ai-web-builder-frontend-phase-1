@@ -350,7 +350,7 @@ export function ProductEntryWidget({
                   type="button"
                   onClick={handleGenerateAI}
                   disabled={disabled || !formData.name}
-                  className="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold"
+                  className="flex-1 h-9 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium text-sm"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   Generate with AI
@@ -360,7 +360,7 @@ export function ProductEntryWidget({
                   onClick={handleWriteManually}
                   disabled={disabled}
                   variant="outline"
-                  className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50"
+                  className="h-9 border border-teal-300 text-teal-700 hover:bg-teal-50 text-sm"
                 >
                   Write Manually
                 </Button>
@@ -438,9 +438,9 @@ export function ProductEntryWidget({
                     disabled={disabled}
                     variant="outline"
                     size="sm"
-                    className="border-2 border-teal-300 text-teal-700 hover:bg-teal-50"
+                    className="h-8 border border-teal-300 text-teal-700 hover:bg-teal-50 text-xs"
                   >
-                    <RefreshCw className="w-4 h-4 mr-2" />
+                    <RefreshCw className="w-3 h-3 mr-1" />
                     Regenerate
                   </Button>
                 )}
@@ -450,9 +450,9 @@ export function ProductEntryWidget({
                   disabled={disabled}
                   variant="ghost"
                   size="sm"
-                  className="text-gray-600 hover:bg-gray-100"
+                  className="h-8 text-gray-600 hover:bg-gray-100 text-xs"
                 >
-                  <X className="w-4 h-4 mr-1" />
+                  <X className="w-3 h-3 mr-1" />
                   Clear
                 </Button>
               </div>
@@ -497,7 +497,7 @@ export function ProductEntryWidget({
             onClick={() => fileInputRef.current?.click()}
             disabled={disabled || uploading}
             variant="outline"
-            className="w-full border-2 border-dashed border-gray-300 hover:border-teal-500 hover:bg-teal-50"
+            className="w-full h-9 border-2 border-dashed border-gray-300 hover:border-teal-500 hover:bg-teal-50 text-sm"
           >
             {uploading ? (
               <>
@@ -623,7 +623,7 @@ export function ProductEntryWidget({
       <Button
         onClick={handleSubmit}
         disabled={disabled || !isValid}
-        className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-semibold"
+        className="w-full h-10 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-medium text-sm shadow-md"
       >
         <Check className="w-4 h-4 mr-2" />
         Add Product

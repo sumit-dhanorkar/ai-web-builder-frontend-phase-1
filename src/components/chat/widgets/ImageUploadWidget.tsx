@@ -125,7 +125,7 @@ export function ImageUploadWidget({
             onClick={handleButtonClick}
             disabled={disabled || uploading}
             variant="outline"
-            className="w-full border-2 border-dashed border-gray-300 hover:border-teal-500 hover:bg-teal-50 transition-all duration-200"
+            className="w-full h-9 border border-dashed border-gray-300 hover:border-teal-500 hover:bg-teal-50 transition-all duration-200 text-sm"
           >
             {uploading ? (
               <>
@@ -177,18 +177,18 @@ export function ImageUploadWidget({
                 onClick={handleRemove}
                 variant="outline"
                 size="sm"
-                className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                className="flex-1 h-8 border-red-200 text-red-600 hover:bg-red-50 text-xs"
               >
-                <X className="w-4 h-4 mr-1" />
+                <X className="w-3 h-3 mr-1" />
                 Remove
               </Button>
               <Button
                 onClick={handleButtonClick}
                 variant="outline"
                 size="sm"
-                className="flex-1 border-teal-200 text-teal-600 hover:bg-teal-50"
+                className="flex-1 h-8 border-teal-200 text-teal-600 hover:bg-teal-50 text-xs"
               >
-                <Upload className="w-4 h-4 mr-1" />
+                <Upload className="w-3 h-3 mr-1" />
                 Change
               </Button>
             </div>
