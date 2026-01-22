@@ -27,36 +27,78 @@ export function ChatContainer() {
       // Clean up collected data - remove intermediate state fields and parse JSON strings
       // Cast to any for flat fields that chatbot stores during conversation (email, phone, whatsapp)
       const data = collectedData as any
+      
+      // Clean export_countries - ensure correct structure (country_name, flag_url)
+      const cleanExportCountries = (data.export_countries || []).map((country: any) => {
+        // Handle both formats: {value, label, flag_url} or {country_name, flag_url}
+        return {
+          country_name: country.country_name || country.label || '',
+          flag_url: country.flag_url || ''
+        }
+      }).filter((c: any) => c.country_name && c.flag_url) // Remove empty entries
+      
       const cleanBusinessInfo: any = {
         company_name: data.company_name || '',
         company_type: data.company_type || '',
         description: data.description || '',
         logo_url: data.logo_url || '',
+        year_established: data.year_established || '',
+        iec_code: data.iec_code || '',
+        gst_number: data.gst_number || '',
+        udyam_adhar: data.udyam_adhar || '',
         contact: {
           email: data.contact?.email || data.email || '',
           phone: data.contact?.phone || data.phone || '',
           whatsapp: data.contact?.whatsapp || data.whatsapp || '',
-          address: data.contact?.address || '',
+          address: data.contact?.address || data.address || '',
           social_media: data.contact?.social_media || {
-            linkedin: '',
-            facebook: '',
-            instagram: '',
-            twitter: '',
-            youtube: ''
+            linkedin: data.contact?.social_media?.linkedin || '',
+            facebook: data.contact?.social_media?.facebook || '',
+            instagram: data.contact?.social_media?.instagram || '',
+            twitter: data.contact?.social_media?.twitter || '',
+            youtube: data.contact?.social_media?.youtube || ''
           }
         },
-        categories: data.categories || [],
-        export_countries: (data.export_countries || []).map((country: any) => ({
-          country_name: country.label || country.country_name || '',
-          flag_url: country.flag_url || ''
+        categories: (data.categories || []).map((cat: any) => ({
+          name: cat.name || '',
+          description: cat.description || '',
+          products: (cat.products || []).map((prod: any) => ({
+            name: prod.name || '',
+            description: prod.description || '',
+            hsn_code: prod.hsn_code || '',
+            image_url: prod.image_url || '',
+            specifications: prod.specifications || {},
+            key_benefits: prod.key_benefits || []
+          }))
         })),
-        certifications: data.certifications || [],
-        team_members: data.team_members || []
+        export_countries: cleanExportCountries,
+        certifications: (data.certifications || []).map((cert: any) => ({
+          name: cert.name || '',
+          issuing_authority: cert.issuing_authority || '',
+          description: cert.description || '',
+          certificate_image_url: cert.certificate_image_url || '',
+          certificate_pdf_url: cert.certificate_pdf_url || ''
+        })),
+        team_members: (data.team_members || []).map((member: any) => ({
+          name: member.name || '',
+          designation: member.designation || '',
+          image: member.image || ''
+        }))
       }
 
-      // Use website config from backend (smart defaults or user customized)
-      const websiteConfig = data.website_config || {
-        // Fallback config if somehow not generated
+      // Parse website_config if it's a JSON string, otherwise use as-is
+      let websiteConfig = data.website_config
+      if (typeof websiteConfig === 'string') {
+        try {
+          websiteConfig = JSON.parse(websiteConfig)
+        } catch (e) {
+          websiteConfig = null
+        }
+      }
+      
+      // Ensure website_config has proper structure with all required fields
+      // Merge with defaults if missing or incomplete
+      const defaultWebsiteConfig = {
         seo_enabled: true,
         email_config: {
           smtp_user: cleanBusinessInfo.contact.email,
@@ -124,12 +166,32 @@ export function ChatContainer() {
         currency: 'USD'
       }
 
-      console.log('🎨 Using website config:', websiteConfig)
+      // Deep merge websiteConfig with defaults (user values override defaults)
+      const finalWebsiteConfig = websiteConfig ? {
+        seo_enabled: websiteConfig.seo_enabled !== undefined ? websiteConfig.seo_enabled : defaultWebsiteConfig.seo_enabled,
+        email_config: {
+          smtp_user: websiteConfig.email_config?.smtp_user || defaultWebsiteConfig.email_config.smtp_user,
+          smtp_password: websiteConfig.email_config?.smtp_password || defaultWebsiteConfig.email_config.smtp_password
+        },
+        design_preferences: {
+          website_type: websiteConfig.design_preferences?.website_type || defaultWebsiteConfig.design_preferences.website_type,
+          theme: websiteConfig.design_preferences?.theme || defaultWebsiteConfig.design_preferences.theme,
+          primary_color: websiteConfig.design_preferences?.primary_color || defaultWebsiteConfig.design_preferences.primary_color,
+          secondary_color: websiteConfig.design_preferences?.secondary_color || defaultWebsiteConfig.design_preferences.secondary_color,
+          style: websiteConfig.design_preferences?.style || defaultWebsiteConfig.design_preferences.style
+        },
+        pages: websiteConfig.pages || defaultWebsiteConfig.pages,
+        language: websiteConfig.language || defaultWebsiteConfig.language,
+        currency: websiteConfig.currency || defaultWebsiteConfig.currency
+      } : defaultWebsiteConfig
+
+      console.log('🎨 Final website config:', finalWebsiteConfig)
+      console.log('📦 Clean business info:', cleanBusinessInfo)
 
       // Create job
       const response = await apiClient.createJob({
         business_info: cleanBusinessInfo,
-        website_config: websiteConfig
+        website_config: finalWebsiteConfig
       })
 
       if (response.job_id) {
