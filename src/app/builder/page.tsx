@@ -373,7 +373,7 @@ export default function BuilderPage() {
       console.log('🔍 Checking for active job on builder page mount...')
 
       // FIRST: Check localStorage (but verify with backend before redirecting)
-      const localJob = jobStateManager.getActiveJob(user?.id)
+      const localJob = jobStateManager.getActiveJob(user?.uid)
       if (localJob && localJob.jobId) {
         console.log('📦 Found job in localStorage:', localJob.jobId, '- verifying with backend...')
 
@@ -401,7 +401,7 @@ export default function BuilderPage() {
         if (response.active_job) {
           // Update localStorage with user ID for isolation
           console.log('✓ Found active job on backend:', response.active_job.job_id)
-          jobStateManager.setActiveJob(response.active_job.job_id, response.active_job.status, user?.id)
+          jobStateManager.setActiveJob(response.active_job.job_id, response.active_job.status, user?.uid)
           toast.info('Resuming your job in progress...')
           router.push(`/jobs/${response.active_job.job_id}/progress`)
           return // Keep showing loading state until redirect happens
@@ -615,7 +615,7 @@ export default function BuilderPage() {
 
       if (response.success) {
         // Store active job in localStorage with user ID for isolation
-        jobStateManager.setActiveJob(response.job_id, response.status, user?.id)
+        jobStateManager.setActiveJob(response.job_id, response.status, user?.uid)
 
         toast.success(response.message || 'Website generation started!')
 
