@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { uploadImage } from '@/lib/firebase-storage'
+import { apiClient } from '@/lib/api-client'
 
 interface TeamMemberData {
   name: string
@@ -87,9 +87,9 @@ export function TeamMemberEntryWidget({
       reader.readAsDataURL(file)
 
       // Upload to Firebase Storage
-      console.log('☁️ Uploading to Firebase (team folder)...')
-      const url = await uploadImage(file, 'team')
-      console.log('✅ Firebase upload complete. URL:', url)
+      console.log('☁️ Uploading team member image...')
+      const url = await apiClient.uploadImage(file, 'team')
+      console.log('✅ Upload complete. URL:', url)
 
       handleChange('image', url)
       console.log('💾 Updated formData.image:', url)

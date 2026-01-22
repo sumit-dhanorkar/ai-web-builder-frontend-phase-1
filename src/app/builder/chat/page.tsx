@@ -113,12 +113,14 @@ function ChatPageContent() {
     }
   }, [isAuthenticated, loading, router])
 
-  // Initialize session
+  // Initialize session only once when authenticated
   useEffect(() => {
-    if (!isInitialized && isAuthenticated) {
+    if (!isInitialized && isAuthenticated && !loading) {
+      console.log('Initializing chat session...')
       initializeSession()
     }
-  }, [isInitialized, initializeSession, isAuthenticated])
+  }, [isInitialized, isAuthenticated, loading])
+  // Note: initializeSession is intentionally NOT in deps to prevent re-initialization
 
   // Check desktop
   useEffect(() => {

@@ -75,6 +75,9 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const [retryCount, setRetryCount] = useState(0)
   const MAX_RETRIES = 3
 
+  // Use ref to track initialization in progress (prevents double calls in Strict Mode)
+  const isInitializingRef = React.useRef(false)
+
   /**
    * Load data from localStorage on mount (for form→chat switching)
    */
@@ -97,86 +100,100 @@ export function ChatProvider({ children }: ChatProviderProps) {
   }, [])
 
   /**
-   * Session recovery - save session state to localStorage
+   * Session tracking - save session ID to sessionStorage (cleared on tab close)
+   * This allows resuming session from backend without storing full message history locally
    */
   useEffect(() => {
-    if (sessionId && messages.length > 0) {
-      try {
-        const sessionState = {
-          sessionId,
-          currentState,
-          messages: messages.slice(-10), // Save last 10 messages only
-          collectedData,
-          progress,
-          timestamp: Date.now(),
-        }
-        localStorage.setItem('chatbot_session', JSON.stringify(sessionState))
-      } catch (error) {
-        console.error('Failed to save session state:', error)
-      }
+    if (sessionId) {
+      sessionStorage.setItem('current_session_id', sessionId)
+      sessionStorage.setItem('session_timestamp', Date.now().toString())
     }
-  }, [sessionId, currentState, messages, collectedData, progress])
-
-  /**
-   * Session recovery - restore session on mount
-   */
-  useEffect(() => {
-    const savedSession = localStorage.getItem('chatbot_session')
-    if (savedSession && !isInitialized) {
-      try {
-        const parsed = JSON.parse(savedSession)
-        const age = Date.now() - parsed.timestamp
-
-        // Only restore if session is less than 1 hour old
-        if (age < 60 * 60 * 1000) {
-          console.log('📥 Restoring previous session...')
-          setSessionId(parsed.sessionId)
-          setCurrentState(parsed.currentState)
-          setMessages(parsed.messages)
-          setCollectedData(parsed.collectedData)
-          setProgress(parsed.progress)
-          setIsInitialized(true)
-
-          toast.success('Session restored!', {
-            description: 'Your conversation has been recovered'
-          })
-        } else {
-          // Session too old, clear it
-          localStorage.removeItem('chatbot_session')
-        }
-      } catch (error) {
-        console.error('Failed to restore session:', error)
-        localStorage.removeItem('chatbot_session')
-      }
-    }
-  }, [])
+  }, [sessionId])
 
   /**
    * Initialize chatbot session
+   * Checks for existing session in sessionStorage and resumes from backend (Redis) if available
    */
   const initializeSession = useCallback(async () => {
+    // Prevent double initialization (handles React Strict Mode double mounting)
+    if (isInitialized || isInitializingRef.current) {
+      console.log('Session already initialized or initializing, skipping...')
+      return
+    }
+
+    isInitializingRef.current = true
+
     try {
       setUIState(prev => ({ ...prev, isLoading: true }))
 
-      const response = await chatAPI.initializeSession({
-        user_id: user?.id || 'guest',
-        resume: false,
-      })
+      // Check for existing session in sessionStorage
+      const existingSessionId = sessionStorage.getItem('current_session_id')
+      const sessionTimestamp = parseInt(sessionStorage.getItem('session_timestamp') || '0')
+      const sessionAge = Date.now() - sessionTimestamp
+      const SESSION_EXPIRY = 24 * 60 * 60 * 1000 // 24 hours (matches Redis TTL)
 
-      setSessionId(response.session_id)
-      setCurrentState(response.current_state)
-      setMessages(response.messages as Message[])
-      // Don't override collectedData if it was loaded from localStorage
-      setCollectedData(prev => {
-        const hasExistingData = Object.keys(prev).length > 0
-        return hasExistingData ? prev : response.collected_data
-      })
-      setIsInitialized(true)
+      let response
 
-      // Send initial welcome message from AI
-      setTimeout(() => {
-        sendWelcomeMessage()
-      }, 500)
+      // Try to resume existing session if it's not expired
+      if (existingSessionId && sessionAge < SESSION_EXPIRY) {
+        console.log('📥 Attempting to resume session from backend:', existingSessionId)
+        try {
+          response = await chatAPI.resumeSession(existingSessionId)
+
+          // Successfully resumed
+          setSessionId(response.session_id)
+          setCurrentState(response.current_state)
+          setMessages(response.messages as Message[])
+          setCollectedData(prev => {
+            const hasExistingData = Object.keys(prev).length > 0
+            return hasExistingData ? prev : response.collected_data
+          })
+          setProgress(response.progress || {
+            section: 'welcome',
+            completionPercent: 0,
+            fieldsCollected: 0,
+            totalFields: 30,
+          })
+          setIsInitialized(true)
+
+          toast.success('Session restored from server!', {
+            description: `Recovered ${response.messages.length} messages`
+          })
+
+          console.log(`✅ Session resumed with ${response.messages.length} messages`)
+        } catch (resumeError: any) {
+          // Session not found in backend, clear sessionStorage and create new
+          console.log('⚠️ Failed to resume session:', resumeError.message)
+          sessionStorage.removeItem('current_session_id')
+          sessionStorage.removeItem('session_timestamp')
+
+          // Fall through to create new session
+          response = null
+        }
+      }
+
+      // Create new session if resume failed or no existing session
+      if (!response) {
+        console.log('🆕 Creating new session...')
+        response = await chatAPI.initializeSession({
+          user_id: user?.uid || 'guest', // Use Firebase UID
+          resume: false,
+        })
+
+        setSessionId(response.session_id)
+        setCurrentState(response.current_state)
+        setMessages(response.messages as Message[])
+        setCollectedData(prev => {
+          const hasExistingData = Object.keys(prev).length > 0
+          return hasExistingData ? prev : response.collected_data
+        })
+        setIsInitialized(true)
+
+        // Send initial welcome message from AI
+        setTimeout(() => {
+          sendWelcomeMessage()
+        }, 500)
+      }
 
     } catch (error) {
       console.error('Failed to initialize session:', error)
@@ -185,10 +202,11 @@ export function ChatProvider({ children }: ChatProviderProps) {
         ...prev,
         error: 'Failed to initialize session'
       }))
+      isInitializingRef.current = false // Reset on error
     } finally {
       setUIState(prev => ({ ...prev, isLoading: false }))
     }
-  }, [user])
+  }, [user?.uid])
 
   /**
    * Send welcome message
@@ -401,7 +419,10 @@ export function ChatProvider({ children }: ChatProviderProps) {
       fieldsCollected: 0,
       totalFields: 30,
     })
+    // Clear both localStorage and sessionStorage
     localStorage.removeItem('chatbot_data')
+    sessionStorage.removeItem('current_session_id')
+    sessionStorage.removeItem('session_timestamp')
   }, [])
 
   /**

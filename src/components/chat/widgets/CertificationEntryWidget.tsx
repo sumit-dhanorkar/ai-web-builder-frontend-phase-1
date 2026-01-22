@@ -61,7 +61,12 @@ export function CertificationEntryWidget({
 
     try {
       setIsGeneratingAI(true)
+
+      // Get JWT token from localStorage
       const token = localStorage.getItem('access_token')
+      if (!token) {
+        throw new Error('Not authenticated')
+      }
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ai-assistant/description/stream`, {
         method: 'POST',

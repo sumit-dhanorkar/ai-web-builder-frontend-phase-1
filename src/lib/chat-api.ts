@@ -1,6 +1,7 @@
 /**
  * Chat API Client
  * Handles all chatbot API interactions
+ * Uses Firebase ID tokens for authorization
  */
 
 import type {
@@ -17,7 +18,7 @@ import type {
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
 /**
- * Get auth token from localStorage
+ * Get JWT token from localStorage
  */
 function getToken(): string | null {
   if (typeof window === 'undefined') return null
@@ -53,9 +54,6 @@ export class ChatAPI {
       // Handle authentication errors
       if (response.status === 401 || response.status === 403) {
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('access_token')
-          localStorage.removeItem('refresh_token')
-          localStorage.removeItem('user')
           window.location.href = '/login'
         }
         throw new Error('Authentication required. Please login.')
@@ -82,6 +80,37 @@ export class ChatAPI {
 
     if (!response.ok) {
       throw new Error(`Failed to get session: ${response.statusText}`)
+    }
+
+    return response.json()
+  }
+
+  /**
+   * Resume an existing session from backend (Redis)
+   * Returns full session data including all messages
+   */
+  async resumeSession(sessionId: string): Promise<SessionInitResponse> {
+    const token = getToken()
+
+    const response = await fetch(`${this.baseUrl}/api/chatbot/session/${sessionId}/resume`, {
+      headers: {
+        ...(token && { Authorization: `Bearer ${token}` }),
+      },
+    })
+
+    if (!response.ok) {
+      // Handle authentication errors
+      if (response.status === 401 || response.status === 403) {
+        throw new Error('Authentication required. Please login.')
+      }
+
+      // Handle session not found
+      if (response.status === 404) {
+        throw new Error('Session not found or expired')
+      }
+
+      const error = await response.json().catch(() => ({ detail: response.statusText }))
+      throw new Error(error.detail || `Failed to resume session: ${response.statusText}`)
     }
 
     return response.json()
@@ -134,9 +163,6 @@ export class ChatAPI {
         // Handle authentication errors
         if (response.status === 401 || response.status === 403) {
           if (typeof window !== 'undefined') {
-            localStorage.removeItem('access_token')
-            localStorage.removeItem('refresh_token')
-            localStorage.removeItem('user')
             window.location.href = '/login'
           }
           throw new Error('Authentication required. Please login.')

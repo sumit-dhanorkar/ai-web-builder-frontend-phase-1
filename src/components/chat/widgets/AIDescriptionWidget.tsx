@@ -42,8 +42,11 @@ export function AIDescriptionWidget({
     try {
       setIsGenerating(true)
 
-      // Get auth token
+      // Get JWT token from localStorage
       const token = localStorage.getItem('access_token')
+      if (!token) {
+        throw new Error('Not authenticated')
+      }
 
       // Determine field_type from context or field name
       let fieldType = 'company'
@@ -60,7 +63,7 @@ export function AIDescriptionWidget({
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` }),
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           operation: 'auto-generate',

@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { toast } from 'sonner'
-import { uploadImage } from '@/lib/firebase-storage'
+import { apiClient } from '@/lib/api-client'
 
 interface ProductData {
   name: string
@@ -156,10 +156,10 @@ export function ProductEntryWidget({
       }
       reader.readAsDataURL(file)
 
-      // Upload to Firebase Storage
-      console.log('☁️ Uploading to Firebase...')
-      const url = await uploadImage(file, 'products')
-      console.log('✅ Firebase upload complete. URL:', url)
+      // Upload via backend
+      console.log('☁️ Uploading image...')
+      const url = await apiClient.uploadImage(file, 'products')
+      console.log('✅ Upload complete. URL:', url)
 
       handleChange('image_url', url)
       console.log('💾 Updated formData.image_url')
@@ -185,15 +185,18 @@ export function ProductEntryWidget({
     try {
       setIsGeneratingAI(true)
 
-      // Get auth token
+      // Get JWT token from localStorage
       const token = localStorage.getItem('access_token')
+      if (!token) {
+        throw new Error('Not authenticated')
+      }
 
       // Call AI description API for product
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/ai-assistant/description/stream`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token && { Authorization: `Bearer ${token}` }),
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           operation: 'auto-generate',

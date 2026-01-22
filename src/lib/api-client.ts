@@ -1,5 +1,6 @@
 /**
  * API client for making authenticated requests to the backend
+ * Uses JWT tokens from backend for authorization
  */
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -17,31 +18,29 @@ export class ApiClient {
   }
 
   /**
-   * Get authentication token from localStorage
+   * Get JWT token from localStorage
    */
-  private getToken(): string | null {
+  getToken(): string | null {
     if (typeof window === 'undefined') return null;
     return localStorage.getItem('access_token');
   }
 
   /**
-   * Set authentication token in localStorage
+   * Store JWT token in localStorage
    */
-  setToken(token: string) {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('access_token', token);
-    }
+  setToken(token: string): void {
+    if (typeof window === 'undefined') return;
+    localStorage.setItem('access_token', token);
   }
 
   /**
-   * Remove authentication token from localStorage
+   * Clear token and user data (for logout)
    */
   clearToken() {
     if (typeof window !== 'undefined') {
       localStorage.removeItem('access_token');
-      localStorage.removeItem('refresh_token');
       localStorage.removeItem('user');
-      // Also clear job state when logging out
+      // Clear job state when logging out
       localStorage.removeItem('activeJobId');
       localStorage.removeItem('activeJobStatus');
       localStorage.removeItem('activeJobUserId');
@@ -80,12 +79,10 @@ export class ApiClient {
 
         // Handle token expiration (401 Unauthorized)
         if (response.status === 401) {
-          // Clear all auth data
+          // JWT token expired or invalid, clear it and redirect to login
           this.clearToken();
-
-          // Only redirect if we're in the browser and not already on login page
           if (typeof window !== 'undefined' && !window.location.pathname.includes('/login')) {
-            console.warn('Token expired or invalid. Redirecting to login...');
+            console.warn('Authentication failed. Redirecting to login...');
             window.location.href = '/login';
           }
         }
@@ -143,6 +140,21 @@ export class ApiClient {
   }
 
   // Auth endpoints
+  async login(email: string, password: string) {
+    const response = await fetch(`${this.baseUrl}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Login failed');
+    }
+
+    return response.json();
+  }
+
   async register(data: {
     email: string;
     password: string;
@@ -150,26 +162,18 @@ export class ApiClient {
     company_name?: string;
     phone?: string;
   }) {
-    return this.post('/api/auth/register', data);
-  }
+    const response = await fetch(`${this.baseUrl}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+    });
 
-  async login(email: string, password: string) {
-    const response = await this.post<{
-      access_token: string;
-      refresh_token: string;
-      token_type: string;
-      expires_in: number;
-      user: any;
-    }>('/api/auth/login', { email, password });
-
-    // Store tokens
-    this.setToken(response.access_token);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('refresh_token', response.refresh_token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Registration failed');
     }
 
-    return response;
+    return response.json();
   }
 
   async logout() {
@@ -184,20 +188,55 @@ export class ApiClient {
     return this.get<any>('/api/auth/me');
   }
 
-  async refreshToken() {
-    if (typeof window === 'undefined') return null;
+  // File upload endpoints
+  async uploadImage(file: File, folder: string = 'images'): Promise<string> {
+    const token = this.getToken();
+    if (!token) throw new Error('Not authenticated');
 
-    const refreshToken = localStorage.getItem('refresh_token');
-    if (!refreshToken) return null;
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
 
-    const response = await this.post<{
-      access_token: string;
-      token_type: string;
-      expires_in: number;
-    }>('/api/auth/refresh', { refresh_token: refreshToken });
+    const response = await fetch(`${this.baseUrl}/api/upload/image`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
 
-    this.setToken(response.access_token);
-    return response;
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Upload failed');
+    }
+
+    const data = await response.json();
+    return data.url;
+  }
+
+  async uploadPDF(file: File, folder: string = 'documents'): Promise<string> {
+    const token = this.getToken();
+    if (!token) throw new Error('Not authenticated');
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', folder);
+
+    const response = await fetch(`${this.baseUrl}/api/upload/pdf`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Upload failed');
+    }
+
+    const data = await response.json();
+    return data.url;
   }
 
   // Job endpoints

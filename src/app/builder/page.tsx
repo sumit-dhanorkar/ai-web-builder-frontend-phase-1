@@ -231,7 +231,14 @@ export default function BuilderPage() {
   const router = useRouter()
   const { isAuthenticated, loading, user, logout } = useAuth()
 
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(() => {
+    // Load saved step from localStorage on initial render
+    if (typeof window !== 'undefined') {
+      const savedStep = localStorage.getItem('builder_current_step')
+      return savedStep ? parseInt(savedStep, 10) : 0
+    }
+    return 0
+  })
   const [isGenerating, setIsGenerating] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
@@ -415,17 +422,27 @@ export default function BuilderPage() {
   useEffect(() => {
     const chatData = loadChatDataFromStorage()
     if (chatData && Object.keys(chatData).length > 0) {
-      console.log('📥 Loading data from chatbot...')
+      console.log('📥 Loading saved form data...')
       const mergedData = syncChatToForm(chatData)
       setBusinessInfo(mergedData)
-      toast.success('Loaded data from chat session!', {
-        description: 'Your conversation data has been imported'
-      })
-      // Clear chat data after loading to prevent re-loading on refresh
-      // Comment this out if you want to keep chat data for multiple switches
-      clearChatDataFromStorage()
+      // Don't clear data - keep it for persistence across refreshes
     }
   }, [])
+
+  // Auto-save businessInfo to localStorage whenever it changes
+  useEffect(() => {
+    // Only save if there's meaningful data
+    if (businessInfo.company_name || businessInfo.company_type || businessInfo.description) {
+      saveChatDataToStorage(businessInfo)
+    }
+  }, [businessInfo])
+
+  // Save current step to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('builder_current_step', currentStep.toString())
+    }
+  }, [currentStep])
 
   useEffect(() => {
     const checkDesktop = () => {
@@ -623,12 +640,16 @@ export default function BuilderPage() {
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
+      // Save data before moving to next step
+      saveChatDataToStorage(businessInfo)
       setCurrentStep(currentStep + 1)
     }
   }
 
   const prevStep = () => {
     if (currentStep > 0) {
+      // Save data before moving to previous step
+      saveChatDataToStorage(businessInfo)
       setCurrentStep(currentStep - 1)
     }
   }

@@ -9,7 +9,7 @@ import { useState, useRef } from 'react'
 import { Upload, Check, Loader2, X, Image as ImageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
-import { uploadImage } from '@/lib/firebase-storage'
+import { apiClient } from '@/lib/api-client'
 
 interface ImageUploadWidgetProps {
   field: string
@@ -75,8 +75,8 @@ export function ImageUploadWidget({
         folder = 'certificates'
       }
 
-      // Upload to Firebase Storage
-      const url = await uploadImage(file, folder)
+      // Upload to backend (which uploads to Firebase Storage)
+      const url = await apiClient.uploadImage(file, folder)
 
       setUploadedUrl(url)
       toast.success('Image uploaded successfully!')

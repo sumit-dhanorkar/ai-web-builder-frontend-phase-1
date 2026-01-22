@@ -28,6 +28,13 @@ export default function ChooseBuilderMethodPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  // Protect route - redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !isAuthenticated) {
+      router.push('/login')
+    }
+  }, [isAuthenticated, loading, router])
+
   const handleLogout = async () => {
     await logout()
     router.push('/')
@@ -39,6 +46,27 @@ export default function ChooseBuilderMethodPage() {
 
   const handleFormMode = () => {
     router.push('/builder')
+  }
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 via-white to-emerald-50">
+        <div className="text-center">
+          <motion.div
+            className="inline-block w-16 h-16 border-4 border-teal-200 border-t-teal-600 rounded-full"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render if not authenticated (will redirect)
+  if (!isAuthenticated) {
+    return null
   }
 
   return (

@@ -207,8 +207,11 @@ export function SummaryReviewWidget({
     try {
       setIsGeneratingAI(true)
 
-      // Get auth token
+      // Get JWT token from localStorage
       const token = localStorage.getItem('access_token')
+      if (!token) {
+        throw new Error('Not authenticated')
+      }
 
       // Determine context data based on field
       let contextData: any = {}
