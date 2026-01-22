@@ -46,10 +46,18 @@ export function Message({ message, isLatest }: MessageProps) {
     return content
   }
 
-  // Check if message is an image URL
+  // Check if message is an image URL (Firebase Storage or other image URLs)
   const isImageUrl = (content: string) => {
-    return content.startsWith('https://firebasestorage.googleapis.com') &&
-           /\.(jpg|jpeg|png|gif|webp)/i.test(content)
+    // Check for Firebase Storage URLs (both formats)
+    const isFirebaseStorage = content.startsWith('https://firebasestorage.googleapis.com') ||
+                              content.startsWith('https://storage.googleapis.com')
+    // Check for image extension
+    const hasImageExtension = /\.(jpg|jpeg|png|gif|webp)/i.test(content)
+    // Also match URLs with image extensions in query params or encoded paths
+    const isImagePath = /\/(logos|products|team|certificates|images)\//i.test(content)
+    
+    return (isFirebaseStorage || content.startsWith('https://')) && 
+           (hasImageExtension || isImagePath)
   }
 
   // Check if message is JSON review data
@@ -83,15 +91,20 @@ export function Message({ message, isLatest }: MessageProps) {
     }
   }
 
-  // Get filename from URL
+  // Get friendly display name from URL
   const getFilename = (url: string) => {
     try {
-      const urlObj = new URL(url)
-      const pathParts = urlObj.pathname.split('/')
-      const encodedFilename = pathParts[pathParts.length - 1]
-      return decodeURIComponent(encodedFilename.split('%2F').pop() || '')
+      // Determine the type based on URL path
+      if (url.includes('/logos/')) return 'Company Logo'
+      if (url.includes('/products/')) return 'Product Image'
+      if (url.includes('/team/')) return 'Team Member Photo'
+      if (url.includes('/certificates/')) return 'Certificate Image'
+      
+      // Fallback: extract extension and show generic name
+      const extension = url.match(/\.(jpg|jpeg|png|gif|webp)/i)?.[1] || 'image'
+      return `Image (${extension.toUpperCase()})`
     } catch (e) {
-      return 'image.jpg'
+      return 'Image'
     }
   }
 

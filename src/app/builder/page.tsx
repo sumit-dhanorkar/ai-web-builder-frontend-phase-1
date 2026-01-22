@@ -529,13 +529,18 @@ export default function BuilderPage() {
   }
 
   const handleSwitchToChat = () => {
-    // Save current form data to localStorage
-    console.log('💾 Saving form data for chat...')
-    saveChatDataToStorage(businessInfo)
-    toast.success('Switching to chat mode...', {
-      description: 'Your form data will be preserved'
+    // Don't transfer form data to chat - chat needs fresh start with welcome message
+    // Form data is already auto-saved, so user can come back to form anytime
+    console.log('🔄 Switching to chat mode (fresh start)...')
+    
+    // Clear any existing chat session so user gets fresh welcome message
+    sessionStorage.removeItem('current_session_id')
+    sessionStorage.removeItem('session_timestamp')
+    
+    toast.success('Switching to AI Chat...', {
+      description: 'Starting a guided conversation'
     })
-    // Navigate to chat page
+    // Navigate directly to chat page
     router.push('/builder/chat')
   }
 

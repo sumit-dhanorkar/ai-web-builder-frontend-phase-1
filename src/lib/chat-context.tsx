@@ -79,25 +79,14 @@ export function ChatProvider({ children }: ChatProviderProps) {
   const isInitializingRef = React.useRef(false)
 
   /**
-   * Load data from localStorage on mount (for form→chat switching)
+   * NOTE: We intentionally do NOT load data from localStorage for chat.
+   * Chat always starts fresh with the welcome message because:
+   * 1. We can't reconstruct chat history/widgets from form data
+   * 2. User expects a fresh guided conversation when choosing chat
+   * 
+   * Form data is preserved in localStorage for the manual form,
+   * so users can switch back to form and continue where they left off.
    */
-  useEffect(() => {
-    const savedData = localStorage.getItem('chatbot_data')
-    if (savedData) {
-      try {
-        const parsed = JSON.parse(savedData)
-        if (Object.keys(parsed).length > 0) {
-          console.log('📥 Loading existing data from form...')
-          setCollectedData(parsed)
-          toast.success('Loaded data from form!', {
-            description: 'Continuing where you left off'
-          })
-        }
-      } catch (error) {
-        console.error('Failed to parse saved chat data:', error)
-      }
-    }
-  }, [])
 
   /**
    * Session tracking - save session ID to sessionStorage (cleared on tab close)
@@ -111,8 +100,33 @@ export function ChatProvider({ children }: ChatProviderProps) {
   }, [sessionId])
 
   /**
+   * Check if there's meaningful chatbot data in localStorage
+   * Returns true only if chatbot_data exists and has actual content
+   */
+  const hasMeaningfulChatData = (): boolean => {
+    try {
+      const data = localStorage.getItem('chatbot_data')
+      if (!data) return false
+      
+      const parsed = JSON.parse(data)
+      if (!parsed || typeof parsed !== 'object') return false
+      
+      // Check if there's any actual data (not just empty object)
+      // Look for key fields that indicate user has actually entered data
+      const hasCompanyName = parsed.company_name && parsed.company_name.trim() !== ''
+      const hasCompanyType = parsed.company_type && parsed.company_type.trim() !== ''
+      const hasDescription = parsed.description && parsed.description.trim() !== ''
+      
+      return hasCompanyName || hasCompanyType || hasDescription
+    } catch {
+      return false
+    }
+  }
+
+  /**
    * Initialize chatbot session
-   * Checks for existing session in sessionStorage and resumes from backend (Redis) if available
+   * - If no meaningful data collected → always show fresh welcome message
+   * - If user has data → try to resume session from backend
    */
   const initializeSession = useCallback(async () => {
     // Prevent double initialization (handles React Strict Mode double mounting)
@@ -126,6 +140,16 @@ export function ChatProvider({ children }: ChatProviderProps) {
     try {
       setUIState(prev => ({ ...prev, isLoading: true }))
 
+      // Check if user has meaningful data - if not, always start fresh
+      const hasData = hasMeaningfulChatData()
+      
+      if (!hasData) {
+        // No meaningful data - clear any stale session and start fresh
+        console.log('📭 No meaningful chatbot data found - starting fresh')
+        sessionStorage.removeItem('current_session_id')
+        sessionStorage.removeItem('session_timestamp')
+      }
+
       // Check for existing session in sessionStorage
       const existingSessionId = sessionStorage.getItem('current_session_id')
       const sessionTimestamp = parseInt(sessionStorage.getItem('session_timestamp') || '0')
@@ -134,8 +158,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
 
       let response
 
-      // Try to resume existing session if it's not expired
-      if (existingSessionId && sessionAge < SESSION_EXPIRY) {
+      // Try to resume existing session only if we have data AND valid session
+      if (hasData && existingSessionId && sessionAge < SESSION_EXPIRY) {
         console.log('📥 Attempting to resume session from backend:', existingSessionId)
         try {
           response = await chatAPI.resumeSession(existingSessionId)
@@ -144,10 +168,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
           setSessionId(response.session_id)
           setCurrentState(response.current_state)
           setMessages(response.messages as Message[])
-          setCollectedData(prev => {
-            const hasExistingData = Object.keys(prev).length > 0
-            return hasExistingData ? prev : response.collected_data
-          })
+          setCollectedData(response.collected_data || {})
           setProgress(response.progress || {
             section: 'welcome',
             completionPercent: 0,
@@ -156,8 +177,8 @@ export function ChatProvider({ children }: ChatProviderProps) {
           })
           setIsInitialized(true)
 
-          toast.success('Session restored from server!', {
-            description: `Recovered ${response.messages.length} messages`
+          toast.success('Session restored!', {
+            description: 'Continuing where you left off'
           })
 
           console.log(`✅ Session resumed with ${response.messages.length} messages`)
@@ -183,10 +204,7 @@ export function ChatProvider({ children }: ChatProviderProps) {
         setSessionId(response.session_id)
         setCurrentState(response.current_state)
         setMessages(response.messages as Message[])
-        setCollectedData(prev => {
-          const hasExistingData = Object.keys(prev).length > 0
-          return hasExistingData ? prev : response.collected_data
-        })
+        setCollectedData(response.collected_data || {})
         setIsInitialized(true)
 
         // Send initial welcome message from AI
