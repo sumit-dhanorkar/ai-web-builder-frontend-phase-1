@@ -39,7 +39,7 @@ import { jobStateManager } from '@/lib/job-state'
 export default function HomePage() {
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null)
   const { isAuthenticated, user, logout } = useAuth()
-  const { checkAndRedirect } = useActiveJobCheck(user?.id) // Pass user ID
+  const { checkAndRedirect } = useActiveJobCheck(user?.uid) // Pass Firebase UID
   const router = useRouter()
 
   // Profile dropdown state
@@ -74,14 +74,16 @@ export default function HomePage() {
   }
 
   const handleStartBuilding = async () => {
+    console.log('Start Building clicked:', { isAuthenticated, user: user?.uid })
     if (!isAuthenticated) {
+      console.log('Not authenticated, redirecting to login')
       router.push('/login')
       return
     }
 
     // INSTANT CHECK: Check localStorage first (synchronous, no delay)
-    // Pass user ID to ensure job belongs to THIS user
-    const localJob = jobStateManager.getActiveJob(user?.id)
+    // Pass user UID to ensure job belongs to THIS user
+    const localJob = jobStateManager.getActiveJob(user?.uid)
     if (localJob && localJob.jobId) {
       // Immediately redirect - no waiting for API
       router.push(`/jobs/${localJob.jobId}/progress`)
@@ -91,8 +93,8 @@ export default function HomePage() {
     // Check backend for active job
     const hasActiveJob = await checkAndRedirect()
     if (!hasActiveJob) {
-      // No active job, proceed to builder
-      router.push('/builder')
+      // No active job, proceed to choice screen
+      router.push('/builder/choose')
     }
   }
 

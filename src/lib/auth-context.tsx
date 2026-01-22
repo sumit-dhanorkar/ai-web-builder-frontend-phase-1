@@ -1,16 +1,17 @@
 'use client';
 
 /**
- * Authentication context for managing user authentication state
+ * Authentication context using backend JWT tokens
+ * Replaces Firebase client SDK with simple API calls
  */
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { apiClient } from './api-client';
 import { jobStateManager } from './job-state';
-import { useRouter } from 'next/navigation';
 
 interface User {
-  id: string;
+  uid: string;
   email: string;
   full_name?: string;
   company_name?: string;
@@ -42,63 +43,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  // Load user from localStorage on mount
+  // Check for existing session on mount
   useEffect(() => {
-    const loadUser = async () => {
+    const checkAuth = async () => {
       try {
-        const token = apiClient['getToken']();
-        if (!token) {
-          setLoading(false);
-          return;
-        }
-
-        // Try to get user from localStorage first
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-
-        // Verify token is still valid
-        try {
-          const currentUser = await apiClient.getCurrentUser();
-          setUser(currentUser);
-          localStorage.setItem('user', JSON.stringify(currentUser));
-        } catch (error: any) {
-          // Token expired or invalid
-          if (error.status === 401) {
-            // Try to refresh token
-            try {
-              await apiClient.refreshToken();
-              const currentUser = await apiClient.getCurrentUser();
-              setUser(currentUser);
-              localStorage.setItem('user', JSON.stringify(currentUser));
-            } catch (refreshError) {
-              // Refresh failed, clear auth
-              apiClient.clearToken();
-              setUser(null);
-            }
-          }
+        const token = apiClient.getToken();
+        if (token) {
+          // Verify token is still valid by fetching user data
+          const userData = await apiClient.getCurrentUser();
+          setUser(userData);
         }
       } catch (error) {
-        console.error('Failed to load user:', error);
+        console.error('Failed to restore session:', error);
+        // Token is invalid, clear it
+        apiClient.clearToken();
       } finally {
         setLoading(false);
       }
     };
 
-    loadUser();
+    checkAuth();
   }, []);
 
   const login = async (email: string, password: string) => {
     setLoading(true);
     try {
+      // Call backend login endpoint
       const response = await apiClient.login(email, password);
+
+      // Store JWT token
+      apiClient.setToken(response.access_token);
+
+      // Set user from response
       setUser(response.user);
 
-      // Stay on current page after login (typically home page)
-      // Users can navigate to builder or admin dashboard using nav buttons
-    } catch (error) {
-      throw error;
+    } catch (error: any) {
+      setLoading(false);
+      throw new Error(error.message || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -113,22 +94,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }) => {
     setLoading(true);
     try {
-      await apiClient.register(data);
-      // Auto-login after registration
-      await login(data.email, data.password);
-    } catch (error) {
+      // Call backend register endpoint
+      const response = await apiClient.register(data);
+
+      // Store JWT token
+      apiClient.setToken(response.access_token);
+
+      // Set user from response
+      setUser(response.user);
+
+    } catch (error: any) {
       setLoading(false);
-      throw error;
+      throw new Error(error.message || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
   const logout = async () => {
     setLoading(true);
     try {
-      await apiClient.logout();
-      setUser(null);
-      // Clear active job state from localStorage
+      // Clear token
+      apiClient.clearToken();
+      // Clear active job state
       jobStateManager.clearActiveJob();
+      setUser(null);
       router.push('/login');
     } catch (error) {
       console.error('Logout error:', error);

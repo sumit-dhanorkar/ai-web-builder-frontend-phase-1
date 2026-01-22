@@ -120,3 +120,38 @@
     @apply bg-background text-foreground;
   }
 }
+
+@layer utilities {
+  /* Custom Scrollbar Styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 2px;
+    height: 2px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thumb-teal-400::-webkit-scrollbar-thumb {
+    background-color: rgb(45 212 191);
+    border-radius: 1px;
+  }
+
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background-color: rgb(20 184 166);
+  }
+
+  .hover\:scrollbar-thumb-teal-500:hover::-webkit-scrollbar-thumb {
+    background-color: rgb(20 184 166);
+  }
+
+  /* Firefox scrollbar styling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(45 212 191) transparent;
+  }
+}

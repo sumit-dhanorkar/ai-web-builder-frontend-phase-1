@@ -63,7 +63,8 @@ import {
   User,
   ChevronDown,
   LogOut,
-  LayoutDashboard
+  LayoutDashboard,
+  MessageSquare
 } from 'lucide-react'
 import { 
   FaLinkedin, 
@@ -94,6 +95,8 @@ import { useAuth } from '@/lib/auth-context'
 import { apiClient } from '@/lib/api-client'
 import { jobStateManager } from '@/lib/job-state'
 import { Loader } from 'lucide-react'
+import { EnhancedProgressDisplay } from '@/components/EnhancedProgressDisplay'
+import { loadChatDataFromStorage, syncChatToForm, saveChatDataToStorage, clearChatDataFromStorage } from '@/lib/state-sync'
 
 interface BusinessInfo {
   company_name: string
@@ -228,7 +231,14 @@ export default function BuilderPage() {
   const router = useRouter()
   const { isAuthenticated, loading, user, logout } = useAuth()
 
-  const [currentStep, setCurrentStep] = useState(0)
+  const [currentStep, setCurrentStep] = useState(() => {
+    // Load saved step from localStorage on initial render
+    if (typeof window !== 'undefined') {
+      const savedStep = localStorage.getItem('builder_current_step')
+      return savedStep ? parseInt(savedStep, 10) : 0
+    }
+    return 0
+  })
   const [isGenerating, setIsGenerating] = useState(false)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false)
@@ -408,6 +418,32 @@ export default function BuilderPage() {
     checkActiveJob()
   }, [isAuthenticated, loading, router, user])
 
+  // Load chat data from localStorage if available
+  useEffect(() => {
+    const chatData = loadChatDataFromStorage()
+    if (chatData && Object.keys(chatData).length > 0) {
+      console.log('📥 Loading saved form data...')
+      const mergedData = syncChatToForm(chatData)
+      setBusinessInfo(mergedData)
+      // Don't clear data - keep it for persistence across refreshes
+    }
+  }, [])
+
+  // Auto-save businessInfo to localStorage whenever it changes
+  useEffect(() => {
+    // Only save if there's meaningful data
+    if (businessInfo.company_name || businessInfo.company_type || businessInfo.description) {
+      saveChatDataToStorage(businessInfo)
+    }
+  }, [businessInfo])
+
+  // Save current step to localStorage whenever it changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('builder_current_step', currentStep.toString())
+    }
+  }, [currentStep])
+
   useEffect(() => {
     const checkDesktop = () => {
       setIsDesktop(window.innerWidth >= 1024)
@@ -490,6 +526,22 @@ export default function BuilderPage() {
     } catch (error) {
       console.error('Logout error:', error)
     }
+  }
+
+  const handleSwitchToChat = () => {
+    // Don't transfer form data to chat - chat needs fresh start with welcome message
+    // Form data is already auto-saved, so user can come back to form anytime
+    console.log('🔄 Switching to chat mode (fresh start)...')
+    
+    // Clear any existing chat session so user gets fresh welcome message
+    sessionStorage.removeItem('current_session_id')
+    sessionStorage.removeItem('session_timestamp')
+    
+    toast.success('Switching to AI Chat...', {
+      description: 'Starting a guided conversation'
+    })
+    // Navigate directly to chat page
+    router.push('/builder/chat')
   }
 
   const addCategory = () => {
@@ -593,12 +645,16 @@ export default function BuilderPage() {
 
   const nextStep = () => {
     if (currentStep < steps.length - 1) {
+      // Save data before moving to next step
+      saveChatDataToStorage(businessInfo)
       setCurrentStep(currentStep + 1)
     }
   }
 
   const prevStep = () => {
     if (currentStep > 0) {
+      // Save data before moving to previous step
+      saveChatDataToStorage(businessInfo)
       setCurrentStep(currentStep - 1)
     }
   }
@@ -766,235 +822,30 @@ export default function BuilderPage() {
         }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
-
-        <div className={`p-4 space-y-3 ${isSidebarCollapsed ? 'px-2' : ''}`}>
-          {/* Progress Circle */}
-          {isSidebarCollapsed ? (
-            // Compact Progress Circle for Collapsed State
-            <motion.div
-              className="w-14 h-14 flex items-center justify-center bg-gradient-to-br from-teal-500/10 to-slate-500/10 rounded-xl border border-teal-200/50 shadow-lg mx-auto"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="relative w-12 h-12">
-                <svg className="transform -rotate-90 w-12 h-12">
-                  <circle
-                    cx="24"
-                    cy="24"
-                    r="20"
-                    stroke="#e5e7eb"
-                    strokeWidth="3"
-                    fill="none"
-                  />
-                  <motion.circle
-                    cx="24"
-                    cy="24"
-                    r="20"
-                    stroke="url(#sidebar-gradient-collapsed)"
-                    strokeWidth="3"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 20}`}
-                    initial={{ strokeDashoffset: 2 * Math.PI * 20 }}
-                    animate={{
-                      strokeDashoffset: 2 * Math.PI * 20 * (1 - (currentStep + 1) / steps.length)
-                    }}
-                    transition={{ duration: 1, ease: "easeInOut" }}
-                  />
-                  <defs>
-                    <linearGradient id="sidebar-gradient-collapsed" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#14b8a6" />
-                      <stop offset="100%" stopColor="#64748b" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-xs font-bold text-teal-600">
-                      {Math.round(((currentStep + 1) / steps.length) * 100)}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          ) : (
-            // Compact Progress Circle for Expanded State
-            <motion.div
-              className="flex flex-col items-center py-3 bg-gradient-to-br from-teal-500/10 to-slate-500/10 rounded-xl border border-teal-200/50 shadow-lg"
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="relative w-16 h-16 mb-2">
-                <svg className="transform -rotate-90 w-16 h-16">
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    stroke="#e5e7eb"
-                    strokeWidth="4"
-                    fill="none"
-                  />
-                  <motion.circle
-                    cx="32"
-                    cy="32"
-                    r="28"
-                    stroke="url(#sidebar-gradient)"
-                    strokeWidth="4"
-                    fill="none"
-                    strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 28}`}
-                    initial={{ strokeDashoffset: 2 * Math.PI * 28 }}
-                    animate={{
-                      strokeDashoffset: 2 * Math.PI * 28 * (1 - (currentStep + 1) / steps.length)
-                    }}
-                    transition={{ duration: 1, ease: "easeInOut" }}
-                  />
-                  <defs>
-                    <linearGradient id="sidebar-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="#14b8a6" />
-                      <stop offset="100%" stopColor="#64748b" />
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="text-lg font-bold text-teal-600">
-                      {Math.round(((currentStep + 1) / steps.length) * 100)}%
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="text-sm font-bold text-gray-800">Step {currentStep + 1} of {steps.length}</div>
-            </motion.div>
-          )}
-
-          {/* Step Navigation */}
-          <div className="space-y-2">
-            {steps.map((step, index) => {
-              const isActive = index === currentStep
-              const isCompleted = index < currentStep
-              const StepIcon = step.icon
-
-              return (
-                <motion.div
-                  key={step.id}
-                  initial={{ x: -20, opacity: 0 }}
-                  animate={{ x: 0, opacity: 1 }}
-                  transition={{ delay: 0.1 * index + 0.3 }}
-                  onClick={() => setCurrentStep(index)}
-                  className="relative cursor-pointer group"
-                >
-                  {isSidebarCollapsed ? (
-                    // Collapsed View - Only Icons
-                    <motion.div
-                      className={`relative w-14 h-14 rounded-xl transition-all duration-300 flex items-center justify-center ${
-                        isActive
-                          ? 'bg-gradient-to-r from-teal-500 to-slate-600 text-white shadow-xl'
-                          : isCompleted
-                            ? 'bg-gradient-to-r from-teal-50 to-slate-50 hover:from-teal-100 hover:to-slate-100 border-2 border-teal-300 shadow-md'
-                            : 'bg-white/50 border-2 border-gray-200 hover:border-gray-300'
-                      }`}
-                      whileHover={{ scale: 1.05 }}
-                      title={step.title}
-                    >
-                      <motion.div
-                        className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                          isActive
-                            ? 'bg-white/20 backdrop-blur-sm'
-                            : isCompleted
-                              ? 'bg-gradient-to-br from-teal-500 to-slate-600'
-                              : 'bg-gray-100'
-                        }`}
-                        animate={isActive ? {
-                          scale: [1, 1.1, 1],
-                          rotate: [0, 5, -5, 0]
-                        } : {}}
-                        transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
-                      >
-                        {isCompleted ? (
-                          <Check className="w-5 h-5 text-white" />
-                        ) : (
-                          <StepIcon className={`w-5 h-5 ${
-                            isActive ? 'text-white' : isCompleted ? 'text-white' : 'text-gray-500'
-                          }`} />
-                        )}
-                      </motion.div>
-                      {/* Connection Line */}
-                      {index < steps.length - 1 && (
-                        <div className="absolute left-1/2 top-full w-0.5 h-3 bg-gradient-to-b from-teal-300 to-transparent -translate-x-1/2" />
-                      )}
-                    </motion.div>
-                  ) : (
-                    // Expanded View - Compact Details
-                    <>
-                      <div className={`p-3 rounded-xl transition-all duration-300 ${
-                        isActive
-                          ? 'bg-gradient-to-r from-teal-500 to-slate-600 text-white shadow-xl'
-                          : isCompleted
-                            ? 'bg-gradient-to-r from-teal-50 to-slate-50 hover:from-teal-100 hover:to-slate-100 border-2 border-teal-300 shadow-md'
-                            : 'bg-white/50 border-2 border-gray-200 hover:border-gray-300'
-                      }`}>
-                        <div className="flex items-center space-x-3">
-                          {/* Step Number/Icon */}
-                          <motion.div
-                            className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
-                              isActive
-                                ? 'bg-white/20 backdrop-blur-sm'
-                                : isCompleted
-                                  ? 'bg-gradient-to-br from-teal-500 to-slate-600'
-                                  : 'bg-gray-100'
-                            }`}
-                            animate={isActive ? {
-                              scale: [1, 1.1, 1],
-                              rotate: [0, 5, -5, 0]
-                            } : {}}
-                            transition={{ duration: 2, repeat: isActive ? Infinity : 0 }}
-                          >
-                            {isCompleted ? (
-                              <Check className="w-5 h-5 text-white" />
-                            ) : (
-                              <StepIcon className={`w-5 h-5 ${
-                                isActive ? 'text-white' : isCompleted ? 'text-white' : 'text-gray-500'
-                              }`} />
-                            )}
-                          </motion.div>
-
-                          {/* Step Content */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between mb-0.5">
-                              <h4 className={`font-bold text-sm ${
-                                isActive ? 'text-white' : isCompleted ? 'text-gray-900' : 'text-gray-700'
-                              }`}>
-                                {step.title}
-                              </h4>
-                              {isCompleted && (
-                                <Check className="w-4 h-4 text-teal-500 flex-shrink-0" />
-                              )}
-                            </div>
-                            <p className={`text-xs leading-tight ${
-                              isActive ? 'text-teal-100' : 'text-gray-600'
-                            }`}>
-                              {step.description}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Vertical Connection Line */}
-                      {index < steps.length - 1 && (
-                        <div className="absolute left-8 top-full w-0.5 h-2 bg-gradient-to-b from-teal-300 to-transparent" />
-                      )}
-                    </>
-                  )}
-                </motion.div>
-              )
-            })}
+        <div className="h-full overflow-y-auto py-4 flex flex-col scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500">
+          <div className="flex-1">
+            <EnhancedProgressDisplay
+              currentStep={currentStep}
+              steps={steps}
+              onStepClick={setCurrentStep}
+              isCollapsed={isSidebarCollapsed}
+            />
           </div>
 
+          {/* Switch to Chat Button */}
+          {!isSidebarCollapsed && (
+            <div className="px-4 pb-4 pt-6 mt-6 border-t border-gray-200/50">
+              <Button
+                onClick={handleSwitchToChat}
+                variant="outline"
+                className="w-full h-12 items-center justify-center gap-2 border-2 border-teal-400 hover:bg-teal-50 text-teal-700 font-medium transition-all duration-200"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Switch to Chat</span>
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
         </div>
       </motion.aside>
 
@@ -1013,13 +864,13 @@ export default function BuilderPage() {
 
             {/* Drawer */}
             <motion.div
-              className="fixed left-0 top-0 h-full w-80 bg-gradient-to-br from-white via-teal-50/20 to-slate-50/30 backdrop-blur-sm shadow-2xl z-50 overflow-y-auto lg:hidden"
+              className="fixed left-0 top-0 h-full w-80 bg-gradient-to-br from-white via-teal-50/20 to-slate-50/30 backdrop-blur-sm shadow-2xl z-50 overflow-y-auto lg:hidden flex flex-col scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500"
               initial={{ x: -320 }}
               animate={{ x: 0 }}
               exit={{ x: -320 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
             >
-              <div className="p-6 space-y-4">
+              <div className="flex-1 p-6 space-y-4 overflow-y-auto scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500">
                 {/* Close Button */}
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-bold text-gray-800">Navigation</h2>
@@ -1166,6 +1017,19 @@ export default function BuilderPage() {
                     )
                   })}
                 </div>
+              </div>
+
+              {/* Switch to Chat Button */}
+              <div className="p-4 pt-6 border-t border-gray-200/50 mt-6">
+                <Button
+                  onClick={handleSwitchToChat}
+                  variant="outline"
+                  className="w-full h-12 items-center justify-center gap-2 border-2 border-teal-400 hover:bg-teal-50 text-teal-700 font-medium transition-all duration-200"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  <span>Switch to Chat</span>
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
               </div>
             </motion.div>
           </>

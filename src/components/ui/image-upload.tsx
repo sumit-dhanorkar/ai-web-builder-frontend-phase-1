@@ -8,9 +8,56 @@ import { Label } from "@/components/ui/label"
 import { Progress } from "@/components/ui/progress"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Upload, X, Image, FileText, Check, AlertTriangle, Replace } from "lucide-react"
-import { uploadImage, uploadPDF, getImageUploadSettings, deleteFile } from "@/lib/firebase-storage"
+import { apiClient } from "@/lib/api-client"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
+
+interface UploadSettings {
+  folder: string
+  maxSize: number
+  recommendedSize: string
+  acceptedTypes: string[]
+}
+
+/**
+ * Get optimized image upload settings by type
+ */
+function getImageUploadSettings(type: string): UploadSettings {
+  const settings: Record<string, UploadSettings> = {
+    logo: {
+      folder: 'logos',
+      maxSize: 2 * 1024 * 1024, // 2MB
+      recommendedSize: '500x500px',
+      acceptedTypes: ['image/png', 'image/jpeg', 'image/svg+xml']
+    },
+    product: {
+      folder: 'products',
+      maxSize: 5 * 1024 * 1024, // 5MB
+      recommendedSize: '1200x800px',
+      acceptedTypes: ['image/jpeg', 'image/png', 'image/webp']
+    },
+    certificate: {
+      folder: 'certificates',
+      maxSize: 5 * 1024 * 1024, // 5MB
+      recommendedSize: '1200x900px',
+      acceptedTypes: ['image/jpeg', 'image/png']
+    },
+    team: {
+      folder: 'team',
+      maxSize: 2 * 1024 * 1024, // 2MB
+      recommendedSize: '400x400px',
+      acceptedTypes: ['image/jpeg', 'image/png']
+    },
+    document: {
+      folder: 'documents',
+      maxSize: 10 * 1024 * 1024, // 10MB
+      recommendedSize: 'Any size',
+      acceptedTypes: ['application/pdf']
+    }
+  }
+
+  return settings[type] || settings.product
+}
 
 interface ImageUploadProps {
   value?: string
@@ -87,9 +134,9 @@ export function ImageUpload({
         if (!acceptPDF) {
           throw new Error('PDF files are not allowed for this field')
         }
-        downloadURL = await uploadPDF(file, settings?.folder || 'documents')
+        downloadURL = await apiClient.uploadPDF(file, settings?.folder || 'documents')
       } else {
-        downloadURL = await uploadImage(file, settings?.folder || 'images')
+        downloadURL = await apiClient.uploadImage(file, settings?.folder || 'images')
       }
 
       clearInterval(progressInterval)
