@@ -169,7 +169,14 @@ export function ChatProvider({ children }: ChatProviderProps) {
           setCurrentState(response.current_state)
           setMessages(response.messages as Message[])
           setCollectedData(response.collected_data || {})
-          setProgress(response.progress || {
+          // Transform snake_case from backend to camelCase for frontend
+          const progress = response.progress
+          setProgress(progress ? {
+            section: progress.section,
+            completionPercent: progress.completion_percent,
+            fieldsCollected: progress.fields_collected,
+            totalFields: progress.total_fields,
+          } : {
             section: 'welcome',
             completionPercent: 0,
             fieldsCollected: 0,

@@ -18,6 +18,7 @@ interface AIDescriptionWidgetProps {
     placeholder?: string
     minLength?: number
     maxLength?: number
+    collected_data?: Record<string, any>  // Data passed from chatbot for AI context
   }
   onComplete: (description: string) => void
   disabled?: boolean

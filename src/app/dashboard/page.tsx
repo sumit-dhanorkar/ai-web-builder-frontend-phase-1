@@ -40,7 +40,7 @@ interface Job {
 
 function DashboardPage() {
   const { user, logout } = useAuth();
-  const { checkAndRedirect } = useActiveJobCheck(user?.id); // Pass user ID
+  const { checkAndRedirect } = useActiveJobCheck(user?.uid); // Pass user ID
   const router = useRouter();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +56,7 @@ function DashboardPage() {
   const handleNewWebsite = async () => {
     // INSTANT CHECK: Check localStorage first (synchronous, no delay)
     // Pass user ID to ensure job belongs to THIS user
-    const localJob = jobStateManager.getActiveJob(user?.id);
+    const localJob = jobStateManager.getActiveJob(user?.uid);
     if (localJob && localJob.jobId) {
       // Immediately redirect - no waiting for API
       router.push(`/jobs/${localJob.jobId}/progress`);

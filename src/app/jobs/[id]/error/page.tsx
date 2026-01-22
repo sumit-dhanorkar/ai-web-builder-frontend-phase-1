@@ -28,14 +28,14 @@ function ErrorPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
-  const { checkAndRedirect } = useActiveJobCheck(user?.id); // Pass user ID
+  const { checkAndRedirect } = useActiveJobCheck(user?.uid); // Pass user ID
   const jobId = params.id as string;
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
 
   const handleTryAgain = async () => {
     // Check localStorage first - pass user ID for isolation
-    const localJob = jobStateManager.getActiveJob(user?.id);
+    const localJob = jobStateManager.getActiveJob(user?.uid);
     if (localJob && localJob.jobId) {
       router.push(`/jobs/${localJob.jobId}/progress`);
       return;

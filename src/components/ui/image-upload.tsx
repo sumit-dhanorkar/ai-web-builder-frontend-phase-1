@@ -176,19 +176,8 @@ export function ImageUpload({
   const clearValue = async () => {
     console.log('Clearing value, current value:', value)
     
-    // If there's a Firebase URL, delete the file from storage
-    if (value && value.includes('firebase')) {
-      setIsDeleting(true)
-      try {
-        await deleteFile(value)
-        toast.success('File deleted successfully')
-      } catch (error) {
-        console.error('Error deleting file:', error)
-        toast.error('Failed to delete file, but removing from form')
-      } finally {
-        setIsDeleting(false)
-      }
-    }
+    // Note: File deletion from Firebase Storage not implemented yet
+    // The file will remain in storage but be removed from the form
     
     // Clear the form state and reset file input
     onValueChange?.('')

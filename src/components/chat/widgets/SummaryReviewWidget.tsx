@@ -49,7 +49,9 @@ export function SummaryReviewWidget({
   onComplete,
   disabled = false,
 }: SummaryReviewWidgetProps) {
-  const { collectedData } = useChat()
+  const { collectedData: rawCollectedData } = useChat()
+  // Cast to any to access flat fields (email, phone, etc.) that chatbot stores during conversation
+  const collectedData = rawCollectedData as any
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [formData, setFormData] = useState<any>({})
   const [editingField, setEditingField] = useState<string | null>(null)
@@ -170,7 +172,7 @@ export function SummaryReviewWidget({
     }, 1000)
   }
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: string, value: any) => {
     setFormData((prev: any) => ({
       ...prev,
       [field]: value
@@ -203,7 +205,7 @@ export function SummaryReviewWidget({
     setShowAIOptions(false)
   }
 
-  const handleGenerateAI = async (fieldName: string, contextType: 'company' | 'category' | 'product') => {
+  const handleGenerateAI = async (fieldName: string, contextType: 'company' | 'category' | 'product' | 'certification') => {
     try {
       setIsGeneratingAI(true)
 
@@ -285,7 +287,7 @@ export function SummaryReviewWidget({
     }
   }
 
-  const handleRegenerateAI = (fieldName: string, contextType: 'company' | 'category' | 'product') => {
+  const handleRegenerateAI = (fieldName: string, contextType: 'company' | 'category' | 'product' | 'certification') => {
     handleChange(fieldName, '')
     handleGenerateAI(fieldName, contextType)
   }
@@ -305,7 +307,7 @@ export function SummaryReviewWidget({
     const canUseAI = isDescriptionField && type === 'textarea'
 
     // Determine context type for AI generation
-    let aiContextType: 'company' | 'category' | 'product' = 'company'
+    let aiContextType: 'company' | 'category' | 'product' | 'certification' = 'company'
     if (config.section === 'category') aiContextType = 'category'
     else if (config.section === 'product') aiContextType = 'product'
     else if (config.section === 'certification') aiContextType = 'certification'

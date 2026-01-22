@@ -25,17 +25,19 @@ export function ChatContainer() {
       setIsGenerating(true)
 
       // Clean up collected data - remove intermediate state fields and parse JSON strings
+      // Cast to any for flat fields that chatbot stores during conversation (email, phone, whatsapp)
+      const data = collectedData as any
       const cleanBusinessInfo: any = {
-        company_name: collectedData.company_name || '',
-        company_type: collectedData.company_type || '',
-        description: collectedData.description || '',
-        logo_url: collectedData.logo_url || '',
+        company_name: data.company_name || '',
+        company_type: data.company_type || '',
+        description: data.description || '',
+        logo_url: data.logo_url || '',
         contact: {
-          email: collectedData.contact?.email || collectedData.email || '',
-          phone: collectedData.contact?.phone || collectedData.phone || '',
-          whatsapp: collectedData.contact?.whatsapp || collectedData.whatsapp || '',
-          address: collectedData.contact?.address || '',
-          social_media: collectedData.contact?.social_media || {
+          email: data.contact?.email || data.email || '',
+          phone: data.contact?.phone || data.phone || '',
+          whatsapp: data.contact?.whatsapp || data.whatsapp || '',
+          address: data.contact?.address || '',
+          social_media: data.contact?.social_media || {
             linkedin: '',
             facebook: '',
             instagram: '',
@@ -43,17 +45,17 @@ export function ChatContainer() {
             youtube: ''
           }
         },
-        categories: collectedData.categories || [],
-        export_countries: (collectedData.export_countries || []).map((country: any) => ({
+        categories: data.categories || [],
+        export_countries: (data.export_countries || []).map((country: any) => ({
           country_name: country.label || country.country_name || '',
           flag_url: country.flag_url || ''
         })),
-        certifications: collectedData.certifications || [],
-        team_members: collectedData.team_members || []
+        certifications: data.certifications || [],
+        team_members: data.team_members || []
       }
 
       // Use website config from backend (smart defaults or user customized)
-      const websiteConfig = collectedData.website_config || {
+      const websiteConfig = data.website_config || {
         // Fallback config if somehow not generated
         seo_enabled: true,
         email_config: {

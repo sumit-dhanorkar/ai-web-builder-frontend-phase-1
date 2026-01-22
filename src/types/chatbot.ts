@@ -295,6 +295,12 @@ export interface SessionInitResponse {
   messages: Message[];
   collected_data: Partial<BusinessInfo>;
   context: ConversationContext;
+  progress?: {
+    section: ConversationSection;
+    completion_percent: number;
+    fields_collected: number;
+    total_fields: number;
+  };
 }
 
 export interface ValidationRequest {
