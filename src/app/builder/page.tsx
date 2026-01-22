@@ -424,7 +424,8 @@ export default function BuilderPage() {
     if (chatData && Object.keys(chatData).length > 0) {
       console.log('📥 Loading saved form data...')
       const mergedData = syncChatToForm(chatData)
-      setBusinessInfo(mergedData)
+      // Cast to local BusinessInfo type (syncChatToForm provides all defaults)
+      setBusinessInfo(mergedData as BusinessInfo)
       // Don't clear data - keep it for persistence across refreshes
     }
   }, [])
