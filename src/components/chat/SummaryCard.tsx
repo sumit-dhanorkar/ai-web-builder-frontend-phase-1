@@ -260,8 +260,8 @@ export function SummaryCard({
             {data.certifications.map((cert, index) => (
               <div key={index} className="bg-gray-50 rounded p-2 border border-gray-200">
                 <p className="font-medium text-xs text-gray-900">{cert.name}</p>
-                {cert.issuing_authority && (
-                  <p className="text-xs text-gray-600">by {cert.issuing_authority}</p>
+                {cert.authority && (
+                  <p className="text-xs text-gray-600">by {cert.authority}</p>
                 )}
               </div>
             ))}
