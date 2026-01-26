@@ -35,6 +35,7 @@ export type WidgetType =
   | 'category_entry'
   | 'team_member_entry'
   | 'certification_entry'
+  | 'certificate_select'
   | 'ai_description'
   | 'summary_review'
   | 'skip_button'
@@ -235,10 +236,9 @@ export interface ExportCountry {
 
 export interface Certification {
   name: string;
-  issuing_authority?: string;
-  description?: string;
-  certificate_image_url?: string;
-  certificate_pdf_url?: string;
+  certificate_url?: string;
+  verification_url?: string;
+  authority?: string;
 }
 
 export interface TeamMember {
