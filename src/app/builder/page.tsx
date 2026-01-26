@@ -1942,35 +1942,50 @@ export default function BuilderPage() {
                               </p>
                             </motion.div>
 
-                            {/* Selected Certifications - Compact Display */}
+                            {/* Selected Certifications - Full Card Display */}
                             {businessInfo.certifications.length > 0 ? (
                               <motion.div
-                                className="space-y-2"
+                                className="grid grid-cols-2 gap-3"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                               >
-                                <div className="flex flex-wrap gap-3">
-                                  {businessInfo.certifications.map((cert, index) => (
-                                    <motion.div
-                                      key={cert.name}
-                                      initial={{ opacity: 0, scale: 0.8 }}
-                                      animate={{ opacity: 1, scale: 1 }}
-                                      transition={{ delay: index * 0.05 }}
-                                      className="relative group"
-                                      whileHover={{ scale: 1.1 }}
-                                    >
-                                      <img
-                                        src={cert.certificate_url}
-                                        alt={cert.name}
-                                        title={cert.name}
-                                        className="w-16 h-16 object-cover rounded-lg shadow-md border-2 border-teal-200/50 hover:border-teal-400 transition-all duration-200 cursor-pointer"
-                                      />
-                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
-                                        {cert.name}
+                                {businessInfo.certifications.map((cert, index) => (
+                                  <motion.div
+                                    key={cert.name}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.05 }}
+                                    className="bg-gradient-to-br from-teal-50 to-emerald-50 rounded-lg border-2 border-teal-200 p-4 hover:shadow-md transition-shadow duration-200"
+                                  >
+                                    <div className="flex items-start gap-3">
+                                      {/* Certificate Image */}
+                                      {cert.certificate_url && (
+                                        <img
+                                          src={cert.certificate_url}
+                                          alt={cert.name}
+                                          className="w-16 h-16 object-cover rounded-lg border border-teal-300 flex-shrink-0 shadow-sm"
+                                        />
+                                      )}
+
+                                      <div className="flex-1 min-w-0">
+                                        <div className="font-semibold text-gray-900">{cert.name}</div>
+                                        <div className="text-xs text-gray-600 mt-1">
+                                          <span className="font-medium">Authority:</span> {cert.authority || 'N/A'}
+                                        </div>
+                                        {cert.verification_url && (
+                                          <a
+                                            href={cert.verification_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-xs text-teal-600 hover:text-teal-700 font-medium mt-2 inline-block underline"
+                                          >
+                                            Verify Certificate →
+                                          </a>
+                                        )}
                                       </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
+                                    </div>
+                                  </motion.div>
+                                ))}
                               </motion.div>
                             ) : (
                               <motion.div
