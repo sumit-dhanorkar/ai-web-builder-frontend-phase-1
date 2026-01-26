@@ -406,6 +406,191 @@ export class ApiClient {
       onError(error as Error);
     }
   }
+
+  // Chat Session endpoints
+  async saveChatSession(data: {
+    session_id: string
+    current_state: string
+    current_section: string
+    collected_data: any
+    status?: string
+  }) {
+    return this.post<{
+      success: boolean
+      message: string
+      session_id: string
+      timestamp: string
+    }>('/api/chat-sessions/save', data);
+  }
+
+  async getChatSession(sessionId: string) {
+    return this.get<{
+      success: boolean
+      session: any
+    }>(`/api/chat-sessions/${sessionId}`);
+  }
+
+  async getLatestChatSession() {
+    return this.get<{
+      success: boolean
+      session: any | null
+      message?: string
+    }>('/api/chat-sessions/user/latest');
+  }
+
+  async listChatSessions(limit: number = 10) {
+    return this.get<{
+      success: boolean
+      sessions: any[]
+      total_count: number
+    }>(`/api/chat-sessions?limit=${Math.min(limit, 100)}`);
+  }
+
+  async completeChatSession(sessionId: string) {
+    return this.post<{
+      success: boolean
+      message: string
+      session_id: string
+      timestamp: string
+    }>(`/api/chat-sessions/${sessionId}/complete`);
+  }
+
+  async getConversationHistory(limit: number = 5) {
+    return this.get<{
+      success: boolean
+      user_id: string
+      sessions: any[]
+      total_sessions: number
+    }>(`/api/chat-sessions/history/conversation?limit=${Math.min(limit, 50)}`);
+  }
+
+  // Chat Messages endpoints
+  async saveChatMessage(data: {
+    session_id: string
+    message_id: string
+    role: string
+    content: string
+    timestamp: string
+    widget?: any
+    skip_available?: boolean
+    status?: string
+  }) {
+    return this.post<{
+      success: boolean
+      message: string
+      session_id: string
+      message_id: string
+      timestamp: string
+    }>('/api/chat-messages/save', data);
+  }
+
+  async batchSaveChatMessages(data: {
+    session_id: string
+    messages: Array<{
+      session_id: string
+      message_id: string
+      role: string
+      content: string
+      timestamp: string
+      widget?: any
+      skip_available?: boolean
+      status?: string
+    }>
+  }) {
+    return this.post<{
+      success: boolean
+      message: string
+      session_id: string
+      saved_count: number
+      failed_count: number
+      total_count: number
+      timestamp: string
+    }>('/api/chat-messages/batch-save', data);
+  }
+
+  async getChatMessages(sessionId: string, limit: number = 100) {
+    return this.get<{
+      success: boolean
+      session_id: string
+      messages: any[]
+      total_count: number
+      ordered_by: string
+    }>(`/api/chat-messages/${sessionId}?limit=${Math.min(limit, 500)}`);
+  }
+
+  async getChatMessageCount(sessionId: string) {
+    return this.get<{
+      success: boolean
+      session_id: string
+      message_count: number
+    }>(`/api/chat-messages/${sessionId}/count`);
+  }
+
+  async deleteChatMessages(sessionId: string) {
+    return this.delete<{
+      success: boolean
+      message: string
+      session_id: string
+      timestamp: string
+    }>(`/api/chat-messages/${sessionId}`);
+  }
+
+  // Website Info endpoints (standardized form sections)
+  async saveBusinessInfo(data: any) {
+    return this.post<{
+      success: boolean
+      message: string
+      data: any
+    }>('/api/website-info/business-info', data)
+  }
+
+  async getBusinessInfo() {
+    return this.get<{
+      success: boolean
+      has_data: boolean
+      data: any | null
+    }>('/api/website-info/business-info')
+  }
+
+  async saveCategoryAndProduct(data: any) {
+    return this.post<{
+      success: boolean
+      message: string
+      data: any
+    }>('/api/website-info/category-and-product', data)
+  }
+
+  async getCategoryAndProduct() {
+    return this.get<{
+      success: boolean
+      has_data: boolean
+      data: any | null
+    }>('/api/website-info/category-and-product')
+  }
+
+  async saveWebsiteConfig(data: any) {
+    return this.post<{
+      success: boolean
+      message: string
+      data: any
+    }>('/api/website-info/website-config', data)
+  }
+
+  async getWebsiteConfig() {
+    return this.get<{
+      success: boolean
+      has_data: boolean
+      data: any | null
+    }>('/api/website-info/website-config')
+  }
+
+  async getAllWebsiteInfo() {
+    return this.get<{
+      success: boolean
+      has_data: boolean
+      data: any | null
+    }>('/api/website-info/all')
+  }
 }
 
 // Export singleton instance

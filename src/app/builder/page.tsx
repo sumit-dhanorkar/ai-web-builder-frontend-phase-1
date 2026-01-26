@@ -231,7 +231,6 @@ interface WebsiteConfig {
 export default function BuilderPage() {
   const router = useRouter()
   const { isAuthenticated, loading, user, logout } = useAuth()
-
   const [currentStep, setCurrentStep] = useState(() => {
     // Load saved step from localStorage on initial render
     if (typeof window !== 'undefined') {
@@ -413,25 +412,68 @@ export default function BuilderPage() {
     checkActiveJob()
   }, [isAuthenticated, loading, router, user])
 
-  // Load chat data from localStorage if available
+  // Load form data from Firebase on mount (when user is authenticated)
   useEffect(() => {
-    const chatData = loadChatDataFromStorage()
-    if (chatData && Object.keys(chatData).length > 0) {
-      console.log('📥 Loading saved form data...')
-      const mergedData = syncChatToForm(chatData)
-      // Cast to local BusinessInfo type (syncChatToForm provides all defaults)
-      setBusinessInfo(mergedData as BusinessInfo)
-      // Don't clear data - keep it for persistence across refreshes
-    }
-  }, [])
+    const loadData = async () => {
+      if (!isAuthenticated || !user?.uid) return
 
-  // Auto-save businessInfo to localStorage whenever it changes
-  useEffect(() => {
-    // Only save if there's meaningful data
-    if (businessInfo.company_name || businessInfo.company_type || businessInfo.description) {
-      saveChatDataToStorage(businessInfo)
+      try {
+        // Load business info first
+        const businessInfoRes = await apiClient.getBusinessInfo()
+        let loadedBusinessInfo: Partial<BusinessInfo> = {
+          company_name: '',
+          company_type: '',
+          logo_url: '',
+          year_established: '',
+          iec_code: '',
+          gst_number: '',
+          udyam_adhar: '',
+          description: '',
+          contact: { email: '', phone: '', whatsapp: '', address: '', social_media: { linkedin: '', facebook: '', instagram: '', twitter: '', youtube: '' } },
+          categories: [],
+          export_countries: [],
+          certifications: [],
+          team_members: []
+        }
+
+        if (businessInfoRes.has_data && businessInfoRes.data) {
+          console.log('📥 Loaded business info from Firebase')
+          loadedBusinessInfo = { ...loadedBusinessInfo, ...businessInfoRes.data }
+        }
+
+        // Load product data and merge with business info
+        const productsRes = await apiClient.getCategoryAndProduct()
+        if (productsRes.has_data && productsRes.data?.categories) {
+          console.log('📥 Loaded categories from Firebase')
+          loadedBusinessInfo.categories = productsRes.data.categories || []
+        }
+
+        // Set the merged business info
+        setBusinessInfo(loadedBusinessInfo as BusinessInfo)
+
+        // Load website config separately
+        const configRes = await apiClient.getWebsiteConfig()
+        if (configRes.has_data && configRes.data) {
+          console.log('📥 Loaded website config from Firebase')
+          setWebsiteConfig(configRes.data)
+        }
+      } catch (error) {
+        console.warn('Failed to load data from Firebase:', error)
+        // Fallback: try loading from localStorage for backward compatibility
+        const chatData = loadChatDataFromStorage()
+        if (chatData && Object.keys(chatData).length > 0) {
+          console.log('📥 Loading saved form data from localStorage (fallback)...')
+          const mergedData = syncChatToForm(chatData)
+          setBusinessInfo(mergedData as BusinessInfo)
+        }
+      }
     }
-  }, [businessInfo])
+
+    loadData()
+  }, [isAuthenticated, user?.uid])
+
+  // Note: Form data is saved explicitly when user clicks "Next" button
+  // No auto-save needed - saves on explicit user action
 
   // Save current step to localStorage whenever it changes
   useEffect(() => {
@@ -638,19 +680,76 @@ export default function BuilderPage() {
     }
   }
 
-  const nextStep = () => {
+  const nextStep = async () => {
     if (currentStep < steps.length - 1) {
-      // Save data before moving to next step
+      // Save to localStorage
       saveChatDataToStorage(businessInfo)
+
+      // Save to Firebase based on current step
+      try {
+        if (currentStep === 0 && (businessInfo.company_name || businessInfo.company_type)) {
+          // Step 0: Save Business Info
+          await apiClient.saveBusinessInfo(businessInfo)
+          console.log('✅ Business info saved')
+        } else if (currentStep === 1) {
+          // Step 1: Save Category and Product
+          await apiClient.saveCategoryAndProduct({
+            categories: businessInfo.categories
+          })
+          console.log('✅ Products & services saved')
+        } else if (currentStep === 2) {
+          // Step 2: Save Website Config
+          await apiClient.saveWebsiteConfig(websiteConfig)
+          console.log('✅ Website configuration saved')
+        }
+      } catch (error) {
+        console.error('Failed to save:', error)
+        // Still allow user to proceed even if save fails
+      }
+
       setCurrentStep(currentStep + 1)
     }
   }
 
-  const prevStep = () => {
+  const prevStep = async () => {
     if (currentStep > 0) {
-      // Save data before moving to previous step
-      saveChatDataToStorage(businessInfo)
-      setCurrentStep(currentStep - 1)
+      const previousStep = currentStep - 1
+
+      // Load data for previous step from Firebase
+      try {
+        if (previousStep === 0) {
+          // Loading from Step 0: Business Info
+          const response = await apiClient.getBusinessInfo()
+          if (response.has_data && response.data) {
+            console.log('📥 Loading business info from Firebase...')
+            setBusinessInfo(response.data as BusinessInfo)
+          }
+        } else if (previousStep === 1) {
+          // Loading from Step 1: Category and Product
+          const response = await apiClient.getCategoryAndProduct()
+          if (response.has_data && response.data) {
+            console.log('📥 Loading category and product from Firebase...')
+            setBusinessInfo(prev => ({
+              ...prev,
+              categories: response.data.categories
+            }))
+          }
+        } else if (previousStep === 2) {
+          // Loading from Step 2: Website Config
+          const response = await apiClient.getWebsiteConfig()
+          if (response.has_data && response.data) {
+            console.log('📥 Loading website config from Firebase...')
+            setWebsiteConfig(response.data)
+          }
+        }
+      } catch (error) {
+        console.warn('Failed to load previous step data:', error)
+        // Continue anyway - data in state memory is used as fallback
+      }
+
+      // Navigate to previous step
+      setCurrentStep(previousStep)
+      console.log('⬅️ Navigated to previous step')
     }
   }
 
@@ -1309,8 +1408,8 @@ export default function BuilderPage() {
                                 context={{
                                   company_name: businessInfo.company_name,
                                   company_type: businessInfo.company_type,
-                                  categories: businessInfo.categories.map(c => c.name).slice(0, 5),
-                                  certifications: businessInfo.certifications.map(c => c.name).slice(0, 3)
+                                  categories: (businessInfo.categories || []).map(c => c.name).slice(0, 5),
+                                  certifications: (businessInfo.certifications || []).map(c => c.name).slice(0, 3)
                                 }}
                               />
                             </div>
@@ -1699,7 +1798,7 @@ export default function BuilderPage() {
                                 </Button>
                               </div>
                         
-                        {businessInfo.team_members.map((member, index) => (
+                        {(businessInfo.team_members || []).map((member, index) => (
                           <div key={index} className="relative group">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                               <motion.div 
@@ -1820,7 +1919,7 @@ export default function BuilderPage() {
                             >
                               <MultiSelect
                                 options={exportContriesWithFlags.map(c => ({ value: c.country_name, label: c.country_name }))}
-                                selected={businessInfo.export_countries.map(c => c.country_name)}
+                                selected={(businessInfo.export_countries || []).map(c => c.country_name)}
                                 onSelectionChange={(selectedNames) => {
                                   const selectedCountries = exportContriesWithFlags.filter(c => selectedNames.includes(c.country_name)).map(c => ({
                                     country_name: c.country_name,
@@ -1846,7 +1945,7 @@ export default function BuilderPage() {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                               >
-                                {businessInfo.export_countries.map((country, index) => (
+                                {(businessInfo.export_countries || []).map((country, index) => (
                                   <motion.div
                                     key={country.country_name}
                                     initial={{ opacity: 0, scale: 0.8 }}
@@ -1919,7 +2018,7 @@ export default function BuilderPage() {
                             >
                               <MultiSelect
                                 options={predefinedCertifications.map(c => ({ value: c.name, label: c.name }))}
-                                selected={businessInfo.certifications.map(c => c.name)}
+                                selected={(businessInfo.certifications || []).map(c => c.name)}
                                 onSelectionChange={(selectedNames) => {
                                   const selectedCerts = predefinedCertifications.filter(c => selectedNames.includes(c.name)).map(c => ({
                                     name: c.name,
@@ -1947,7 +2046,7 @@ export default function BuilderPage() {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                               >
-                                {businessInfo.certifications.map((cert, index) => (
+                                {(businessInfo.certifications || []).map((cert, index) => (
                                   <motion.div
                                     key={cert.name}
                                     initial={{ opacity: 0, y: 10 }}
