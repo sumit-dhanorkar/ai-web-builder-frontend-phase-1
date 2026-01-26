@@ -1842,32 +1842,30 @@ export default function BuilderPage() {
                             {/* Selected Countries - Compact Display */}
                             {businessInfo.export_countries.length > 0 ? (
                               <motion.div
-                                className="space-y-2"
+                                className="grid grid-cols-6 gap-4"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                               >
-                                <div className="flex flex-wrap gap-3">
-                                  {businessInfo.export_countries.map((country, index) => (
-                                    <motion.div
-                                      key={country.country_name}
-                                      initial={{ opacity: 0, scale: 0.8 }}
-                                      animate={{ opacity: 1, scale: 1 }}
-                                      transition={{ delay: index * 0.03 }}
-                                      className="relative group"
-                                      whileHover={{ scale: 1.1 }}
-                                    >
-                                      <img
-                                        src={country.flag_url}
-                                        alt={country.country_name}
-                                        title={country.country_name}
-                                        className="w-12 h-9 object-cover rounded-md shadow-md border-2 border-teal-200/50 hover:border-teal-400 transition-all duration-200 cursor-pointer"
-                                      />
-                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
-                                        {country.country_name}
-                                      </div>
-                                    </motion.div>
-                                  ))}
-                                </div>
+                                {businessInfo.export_countries.map((country, index) => (
+                                  <motion.div
+                                    key={country.country_name}
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ delay: index * 0.03 }}
+                                    className="relative group flex flex-col items-center"
+                                    whileHover={{ scale: 1.05 }}
+                                  >
+                                    <img
+                                      src={country.flag_url}
+                                      alt={country.country_name}
+                                      title={country.country_name}
+                                      className="w-16 h-12 object-cover rounded-lg shadow-md border-2 border-teal-200/50 hover:border-teal-400 transition-all duration-200 cursor-pointer"
+                                    />
+                                    <div className="text-xs font-medium text-gray-700 mt-2 text-center">
+                                      {country.country_name}
+                                    </div>
+                                  </motion.div>
+                                ))}
                               </motion.div>
                             ) : (
                               <motion.div
