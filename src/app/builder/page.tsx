@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { ImageUpload } from '@/components/ui/image-upload'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
+import { MultiSelect } from '@/components/ui/multiselect'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { AIDescriptionAssistant } from '@/components/AIDescriptionAssistant'
 import {
@@ -64,7 +65,8 @@ import {
   ChevronDown,
   LogOut,
   LayoutDashboard,
-  MessageSquare
+  MessageSquare,
+  Target
 } from 'lucide-react'
 import { 
   FaLinkedin, 
@@ -89,7 +91,7 @@ import { toast } from 'sonner'
 import { ProductStep } from '@/components/ProductStep'
 import { ConfigurationStep } from '@/components/ConfigurationStep'
 import { Combobox } from '@/components/ui/combobox'
-import { establishmentYears } from '@/data/suggestions'
+import { establishmentYears, exportContriesWithFlags, predefinedCertifications } from '@/data/suggestions'
 import { saveCompleteProject } from '@/lib/firebase-helpers'
 import { useAuth } from '@/lib/auth-context'
 import { apiClient } from '@/lib/api-client'
@@ -147,10 +149,9 @@ interface BusinessInfo {
   }>
   certifications: Array<{
     name: string
-    issuing_authority: string
-    description: string
-    certificate_image_url?: string
-    certificate_pdf_url?: string
+    certificate_url: string
+    verification_url?: string
+    authority?: string
   }>
   team_members: Array<{
     name: string
@@ -271,13 +272,7 @@ export default function BuilderPage() {
     },
     categories: [],
     export_countries: [],
-    certifications: [{
-      name: '',
-      issuing_authority: '',
-      description: '',
-      certificate_image_url: '',
-      certificate_pdf_url: ''
-    }],
+    certifications: [],
     team_members: [{
       name: '',
       designation: '',
@@ -567,10 +562,9 @@ export default function BuilderPage() {
       ...prev,
       certifications: [...prev.certifications, {
         name: '',
-        issuing_authority: '',
-        description: '',
-        certificate_image_url: '',
-        certificate_pdf_url: ''
+        certificate_url: '',
+        verification_url: '',
+        authority: ''
       }]
     }))
   }
@@ -1788,6 +1782,210 @@ export default function BuilderPage() {
                             </motion.div>
                         </AccordionContent>
                       </AccordionItem>
+
+                      {/* Section: Global Export Markets */}
+                      <AccordionItem
+                        value="export-markets"
+                        className="border-2 border-teal-200/50 rounded-2xl bg-gradient-to-br from-white to-teal-50/30 shadow-lg hover:shadow-xl transition-all duration-300"
+                      >
+                        <AccordionTrigger className="hover:no-underline px-6 pt-6 pb-4">
+                          <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center gap-4">
+                              <motion.div
+                                className="w-12 h-12 bg-gradient-to-br from-teal-500 to-slate-600  rounded-2xl flex items-center justify-center shadow-lg"
+                                whileHover={{ scale: 1.05, rotate: -5 }}
+                              >
+                                <Globe className="w-6 h-6 text-white" />
+                              </motion.div>
+                              <div className="text-left">
+                                <h3 className="text-xl font-bold bg-gradient-to-r from-teal-700 to-cyan-700 bg-clip-text text-transparent">
+                                  Global Export Markets
+                                </h3>
+                                <p className="text-sm text-gray-600 font-normal">Select your target export destinations</p>
+                              </div>
+                            </div>
+                            <Badge className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-3 py-1">
+                              <Globe className="w-3 h-3 mr-1" />
+                              {businessInfo.export_countries.length} Selected
+                            </Badge>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-6 pb-6 pt-2">
+                          <CardContent className="space-y-4">
+                            {/* Country Selection */}
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="space-y-3"
+                            >
+                              <MultiSelect
+                                options={exportContriesWithFlags.map(c => ({ value: c.country_name, label: c.country_name }))}
+                                selected={businessInfo.export_countries.map(c => c.country_name)}
+                                onSelectionChange={(selectedNames) => {
+                                  const selectedCountries = exportContriesWithFlags.filter(c => selectedNames.includes(c.country_name)).map(c => ({
+                                    country_name: c.country_name,
+                                    flag_url: c.image_url
+                                  }))
+                                  setBusinessInfo(prev => ({ ...prev, export_countries: selectedCountries }))
+                                }}
+                                placeholder="Select target export countries..."
+                                searchPlaceholder="Search countries..."
+                                className="border-2 border-teal-200/50 focus-within:border-teal-500 bg-white transition-colors duration-200"
+                                clearable={true}
+                              />
+                              <p className="text-xs text-gray-500 flex items-center gap-1">
+                                <Target className="w-3 h-3" />
+                                Choose multiple destinations for your export business
+                              </p>
+                            </motion.div>
+
+                            {/* Selected Countries - Compact Display */}
+                            {businessInfo.export_countries.length > 0 ? (
+                              <motion.div
+                                className="space-y-2"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                              >
+                                <div className="flex flex-wrap gap-3">
+                                  {businessInfo.export_countries.map((country, index) => (
+                                    <motion.div
+                                      key={country.country_name}
+                                      initial={{ opacity: 0, scale: 0.8 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ delay: index * 0.03 }}
+                                      className="relative group"
+                                      whileHover={{ scale: 1.1 }}
+                                    >
+                                      <img
+                                        src={country.flag_url}
+                                        alt={country.country_name}
+                                        title={country.country_name}
+                                        className="w-12 h-9 object-cover rounded-md shadow-md border-2 border-teal-200/50 hover:border-teal-400 transition-all duration-200 cursor-pointer"
+                                      />
+                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+                                        {country.country_name}
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-center py-6 border-2 border-dashed border-teal-200 rounded-xl bg-teal-50/30"
+                              >
+                                <Globe className="w-8 h-8 text-teal-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-600 mb-1">No markets selected yet</p>
+                                <p className="text-xs text-gray-500">Select countries from the dropdown above</p>
+                              </motion.div>
+                            )}
+                          </CardContent>
+                        </AccordionContent>
+                      </AccordionItem>
+
+                      {/* Section: Certifications & Credentials */}
+                      <AccordionItem
+                        value="certifications"
+                        className="border-2 border-teal-200/50 rounded-2xl bg-gradient-to-br from-white to-teal-50/30 shadow-lg hover:shadow-xl transition-all duration-300"
+                      >
+                        <AccordionTrigger className="hover:no-underline px-6 pt-6 pb-4">
+                          <div className="flex items-center justify-between w-full">
+                            <div className="flex items-center gap-4">
+                              <motion.div
+                                className="w-12 h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg"
+                                whileHover={{ scale: 1.05, rotate: 10 }}
+                              >
+                                <Award className="w-6 h-6 text-white" />
+                              </motion.div>
+                              <div className="text-left">
+                                <h3 className="text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
+                                  Certifications & Credentials
+                                </h3>
+                                <p className="text-sm text-gray-600 font-normal">Select your quality standards and compliance certifications</p>
+                              </div>
+                            </div>
+                            <Badge className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-3 py-1">
+                              <Award className="w-3 h-3 mr-1" />
+                              {businessInfo.certifications.length} Selected
+                            </Badge>
+                          </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-6 pb-6 pt-2">
+                          <CardContent className="space-y-4">
+                            {/* Certification Selection */}
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="space-y-3"
+                            >
+                              <MultiSelect
+                                options={predefinedCertifications.map(c => ({ value: c.name, label: c.name }))}
+                                selected={businessInfo.certifications.map(c => c.name)}
+                                onSelectionChange={(selectedNames) => {
+                                  const selectedCerts = predefinedCertifications.filter(c => selectedNames.includes(c.name)).map(c => ({
+                                    name: c.name,
+                                    certificate_url: c.certificate_url,
+                                    verification_url: c.verification_url,
+                                    authority: c.authority
+                                  }))
+                                  setBusinessInfo(prev => ({ ...prev, certifications: selectedCerts }))
+                                }}
+                                placeholder="Select quality certifications..."
+                                searchPlaceholder="Search certifications..."
+                                className="border-2 border-teal-200/50 focus-within:border-teal-500 bg-white transition-colors duration-200"
+                                clearable={true}
+                              />
+                              <p className="text-xs text-gray-500 flex items-center gap-1">
+                                <Award className="w-3 h-3" />
+                                Choose certifications to showcase your standards and compliance
+                              </p>
+                            </motion.div>
+
+                            {/* Selected Certifications - Compact Display */}
+                            {businessInfo.certifications.length > 0 ? (
+                              <motion.div
+                                className="space-y-2"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                              >
+                                <div className="flex flex-wrap gap-3">
+                                  {businessInfo.certifications.map((cert, index) => (
+                                    <motion.div
+                                      key={cert.name}
+                                      initial={{ opacity: 0, scale: 0.8 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      transition={{ delay: index * 0.05 }}
+                                      className="relative group"
+                                      whileHover={{ scale: 1.1 }}
+                                    >
+                                      <img
+                                        src={cert.certificate_url}
+                                        alt={cert.name}
+                                        title={cert.name}
+                                        className="w-16 h-16 object-cover rounded-lg shadow-md border-2 border-teal-200/50 hover:border-teal-400 transition-all duration-200 cursor-pointer"
+                                      />
+                                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-10">
+                                        {cert.name}
+                                      </div>
+                                    </motion.div>
+                                  ))}
+                                </div>
+                              </motion.div>
+                            ) : (
+                              <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-center py-6 border-2 border-dashed border-teal-200 rounded-xl bg-teal-50/30"
+                              >
+                                <Award className="w-8 h-8 text-teal-400 mx-auto mb-2" />
+                                <p className="text-sm text-gray-600 mb-1">No certifications selected yet</p>
+                                <p className="text-xs text-gray-500">Select certifications from the dropdown above</p>
+                              </motion.div>
+                            )}
+                          </CardContent>
+                        </AccordionContent>
+                      </AccordionItem>
                     </Accordion>
                   </CardContent>
                 </Card>
@@ -1796,11 +1994,7 @@ export default function BuilderPage() {
               {currentStep === 1 && (
                 <ProductStep
                   categories={businessInfo.categories}
-                  exportCountries={businessInfo.export_countries}
-                  certifications={businessInfo.certifications}
                   onUpdateCategories={(categories) => setBusinessInfo(prev => ({ ...prev, categories }))}
-                  onUpdateCountries={(countries) => setBusinessInfo(prev => ({ ...prev, export_countries: countries }))}
-                  onUpdateCertifications={(certifications) => setBusinessInfo(prev => ({ ...prev, certifications }))}
                 />
               )}
 

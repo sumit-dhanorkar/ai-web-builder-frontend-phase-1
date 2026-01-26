@@ -29,14 +29,52 @@ export function ChatContainer() {
       const data = collectedData as any
       
       // Clean export_countries - ensure correct structure (country_name, flag_url)
-      const cleanExportCountries = (data.export_countries || []).map((country: any) => {
+      let exportCountries = data.export_countries || []
+      if (typeof exportCountries === 'string') {
+        try {
+          exportCountries = JSON.parse(exportCountries)
+        } catch (e) {
+          exportCountries = []
+        }
+      }
+      const cleanExportCountries = (exportCountries || []).map((country: any) => {
         // Handle both formats: {value, label, flag_url} or {country_name, flag_url}
         return {
           country_name: country.country_name || country.label || '',
           flag_url: country.flag_url || ''
         }
       }).filter((c: any) => c.country_name && c.flag_url) // Remove empty entries
-      
+
+      // Clean certifications - ensure correct structure
+      let certifications = data.certifications || []
+      if (typeof certifications === 'string') {
+        try {
+          certifications = JSON.parse(certifications)
+        } catch (e) {
+          certifications = []
+        }
+      }
+
+      // Clean team_members - ensure correct structure
+      let teamMembers = data.team_members || []
+      if (typeof teamMembers === 'string') {
+        try {
+          teamMembers = JSON.parse(teamMembers)
+        } catch (e) {
+          teamMembers = []
+        }
+      }
+
+      // Clean categories - ensure correct structure
+      let categories = data.categories || []
+      if (typeof categories === 'string') {
+        try {
+          categories = JSON.parse(categories)
+        } catch (e) {
+          categories = []
+        }
+      }
+
       const cleanBusinessInfo: any = {
         company_name: data.company_name || '',
         company_type: data.company_type || '',
@@ -59,7 +97,7 @@ export function ChatContainer() {
             youtube: data.contact?.social_media?.youtube || ''
           }
         },
-        categories: (data.categories || []).map((cat: any) => ({
+        categories: (categories || []).map((cat: any) => ({
           name: cat.name || '',
           description: cat.description || '',
           products: (cat.products || []).map((prod: any) => ({
@@ -72,14 +110,13 @@ export function ChatContainer() {
           }))
         })),
         export_countries: cleanExportCountries,
-        certifications: (data.certifications || []).map((cert: any) => ({
+        certifications: (certifications || []).map((cert: any) => ({
           name: cert.name || '',
-          issuing_authority: cert.issuing_authority || '',
-          description: cert.description || '',
-          certificate_image_url: cert.certificate_image_url || '',
-          certificate_pdf_url: cert.certificate_pdf_url || ''
+          certificate_url: cert.certificate_url || '',
+          verification_url: cert.verification_url || '',
+          authority: cert.authority || ''
         })),
-        team_members: (data.team_members || []).map((member: any) => ({
+        team_members: (teamMembers || []).map((member: any) => ({
           name: member.name || '',
           designation: member.designation || '',
           image: member.image || ''

@@ -577,3 +577,49 @@ export const colorSchemes = [
   { value: "forest", label: "Forest Green", primary: "#14532D", secondary: "#166534", preview: "bg-green-800" },
   { value: "wine", label: "Wine Red", primary: "#7F1D1D", secondary: "#991B1B", preview: "bg-red-800" },
 ]
+
+// Predefined certifications with Firebase image URLs, verification links, and authority
+export const predefinedCertifications = [
+  {
+    name: "APEDA",
+    certificate_url: "https://firebasestorage.googleapis.com/v0/b/mittiglow-58326.firebasestorage.app/o/ExporterImage%2FApeda.png?alt=media&token=f80e3c9f-930c-464d-bf6c-d7c57fb272f1",
+    verification_url: "https://apeda.gov.in/apedawebsite/six_head_product/Organic_Certification.htm",
+    authority: "Agricultural and Processed Food Products Export Development Authority"
+  },
+  {
+    name: "FSSAI",
+    certificate_url: "https://firebasestorage.googleapis.com/v0/b/jewelleryfrontend.firebasestorage.app/o/ai-web-builder%2Flogos%2F1765303914147_k3sqiehg1gr.png?alt=media&token=cf7557de-d613-48be-a3d9-8870c02fd846",
+    verification_url: "https://foscos.fssai.gov.in/",
+    authority: "Food Safety and Standards Authority of India"
+  },
+  {
+    name: "GST",
+    certificate_url: "https://firebasestorage.googleapis.com/v0/b/mittiglow-58326.firebasestorage.app/o/ExporterImage%2Fgst_logo.png?alt=media&token=5003f51b-61b1-4a63-8209-1d4087360f54",
+    verification_url: "https://services.gst.gov.in/services/searchtp",
+    authority: "Goods and Services Tax"
+  },
+  {
+    name: "IEC",
+    certificate_url: "https://firebasestorage.googleapis.com/v0/b/mittiglow-58326.firebasestorage.app/o/ExporterImage%2Fimportexportcode.png?alt=media&token=fc46d3d4-ad84-4c05-984b-21b8d61b70d1",
+    verification_url: "https://www.dgft.gov.in/CP/?opt=view-any-ice",
+    authority: "Import Export Code"
+  },
+  {
+    name: "MSME",
+    certificate_url: "https://firebasestorage.googleapis.com/v0/b/mittiglow-58326.firebasestorage.app/o/ExporterImage%2Fmsme.jpeg?alt=media&token=d5f603c6-0350-406d-a018-cf0f09c88566",
+    verification_url: "https://udyamregistration.gov.in/",
+    authority: "Micro, Small and Medium Enterprises"
+  },
+  {
+    name: "Organic Certification",
+    certificate_url: "https://firebasestorage.googleapis.com/v0/b/mittiglow-58326.firebasestorage.app/o/ExporterImage%2FOrganicCert.webp?alt=media&token=a0e5ed03-ad0e-4cb5-bd4e-0956d1db0d4e",
+    verification_url: "https://apeda.gov.in/",
+    authority: "Organic Certification Authority"
+  },
+  {
+    name: "Udyam",
+    certificate_url: "https://firebasestorage.googleapis.com/v0/b/mittiglow-58326.firebasestorage.app/o/ExporterImage%2Fudyami.png?alt=media&token=213ef710-6034-49fc-a048-021daffe82e5",
+    verification_url: "https://udyamregistration.gov.in/",
+    authority: "Udyam Registration (MSME)"
+  }
+]

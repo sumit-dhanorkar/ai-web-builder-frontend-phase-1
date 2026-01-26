@@ -80,12 +80,33 @@ export function Message({ message, isLatest }: MessageProps) {
     }
   }
 
+  // Check if message is certifications array
+  const isCertificationsArray = (content: string) => {
+    try {
+      const parsed = JSON.parse(content)
+      return Array.isArray(parsed) && parsed.length > 0 && parsed[0].certificate_url && parsed[0].authority
+    } catch (e) {
+      return false
+    }
+  }
+
   // Format export countries display
   const formatExportCountries = (content: string) => {
     try {
       const countries = JSON.parse(content)
       const names = countries.map((c: any) => c.label).join(', ')
       return `✅ Selected ${countries.length} ${countries.length === 1 ? 'country' : 'countries'}: ${names}`
+    } catch (e) {
+      return content
+    }
+  }
+
+  // Format certifications display
+  const formatCertifications = (content: string) => {
+    try {
+      const certifications = JSON.parse(content)
+      const names = certifications.map((c: any) => c.name).join(', ')
+      return `✅ Added ${certifications.length} ${certifications.length === 1 ? 'certification' : 'certifications'}: ${names}`
     } catch (e) {
       return content
     }
@@ -173,6 +194,11 @@ export function Message({ message, isLatest }: MessageProps) {
                 // Format export countries nicely
                 <div className="flex items-center gap-2 text-sm">
                   <span>{formatExportCountries(message.content)}</span>
+                </div>
+              ) : isUser && isCertificationsArray(message.content) ? (
+                // Format certifications nicely
+                <div className="flex items-center gap-2 text-sm">
+                  <span>{formatCertifications(message.content)}</span>
                 </div>
               ) : (
                 // Normal text rendering

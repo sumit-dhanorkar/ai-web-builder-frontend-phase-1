@@ -10,7 +10,7 @@ import { ImageUploadWidget } from './ImageUploadWidget'
 import { MultiSelectWidget } from './MultiSelectWidget'
 import { SelectWidget } from './SelectWidget'
 import { ProductEntryWidget } from './ProductEntryWidget'
-import { CertificationEntryWidget } from './CertificationEntryWidget'
+import { CertificateSelectWidget } from './CertificateSelectWidget'
 import { TeamMemberEntryWidget } from './TeamMemberEntryWidget'
 import { ThemeSelectWidget } from './ThemeSelectWidget'
 import { ColorSchemeSelectWidget } from './ColorSchemeSelectWidget'
@@ -109,8 +109,9 @@ export function WidgetRenderer({ widget, onComplete, disabled = false }: WidgetR
       )
 
     case 'certification_entry':
+    case 'certificate_select':
       return (
-        <CertificationEntryWidget
+        <CertificateSelectWidget
           field={widget.field}
           config={widget.config as any}
           onComplete={onComplete}
