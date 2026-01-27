@@ -809,7 +809,7 @@ export default function BuilderPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       {/* Navigation */}
-      <Navbar />
+      <Navbar onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
 
       {/* Toggle Button - Outside Sidebar */}
       <motion.button
@@ -873,7 +873,7 @@ export default function BuilderPage() {
           <>
             {/* Backdrop */}
             <motion.div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:z-[9998] lg:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -882,50 +882,52 @@ export default function BuilderPage() {
 
             {/* Drawer */}
             <motion.div
-              className="fixed left-0 top-0 h-full w-80 bg-gradient-to-br from-white via-teal-50/20 to-slate-50/30 backdrop-blur-sm shadow-2xl z-50 overflow-y-auto lg:hidden flex flex-col scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500"
+              className="fixed left-0 top-0 bottom-0 w-72 sm:w-80 bg-white border-r border-gray-200 shadow-2xl z-50 lg:z-[9999] overflow-hidden lg:hidden flex flex-col"
               initial={{ x: -320 }}
               animate={{ x: 0 }}
               exit={{ x: -320 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
             >
-              <div className="flex-1 p-6 space-y-4 overflow-y-auto scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500">
-                {/* Close Button */}
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-bold text-gray-800">Navigation</h2>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className="hover:bg-red-50 hover:text-red-600"
-                  >
-                    <X className="w-5 h-5" />
-                  </Button>
-                </div>
+              {/* Sidebar Header - Matches Navbar */}
+              <div className="bg-gradient-to-r from-teal-50 to-slate-50 border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between flex-shrink-0">
+                <h2 className="text-sm sm:text-base font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">Progress</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="hover:bg-gray-200/50 text-gray-600 -mr-2"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+
+              {/* Sidebar Content */}
+              <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500 p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
 
                 {/* Progress Circle */}
-                <div className="flex flex-col items-center py-6 bg-gradient-to-br from-teal-500/10 to-slate-500/10 rounded-2xl border border-teal-200/50 shadow-lg">
-                  <div className="relative w-24 h-24 mb-4">
-                    <svg className="transform -rotate-90 w-24 h-24">
+                <div className="flex flex-col items-center py-3 sm:py-4 md:py-6 px-2 bg-gradient-to-br from-teal-500/10 to-slate-500/10 rounded-2xl border border-teal-200/50 shadow-lg">
+                  <div className="relative w-16 sm:w-20 md:w-24 h-16 sm:h-20 md:h-24 mb-2 sm:mb-3 md:mb-4 flex items-center justify-center">
+                    <svg viewBox="0 0 100 100" className="transform -rotate-90 w-full h-full absolute inset-0">
                       <circle
-                        cx="48"
-                        cy="48"
-                        r="44"
+                        cx="50"
+                        cy="50"
+                        r="45"
                         stroke="#e5e7eb"
-                        strokeWidth="6"
+                        strokeWidth="4"
                         fill="none"
                       />
                       <motion.circle
-                        cx="48"
-                        cy="48"
-                        r="44"
+                        cx="50"
+                        cy="50"
+                        r="45"
                         stroke="url(#mobile-gradient)"
-                        strokeWidth="6"
+                        strokeWidth="4"
                         fill="none"
                         strokeLinecap="round"
-                        strokeDasharray={`${2 * Math.PI * 44}`}
-                        initial={{ strokeDashoffset: 2 * Math.PI * 44 }}
+                        strokeDasharray={`${2 * Math.PI * 45}`}
+                        initial={{ strokeDashoffset: 2 * Math.PI * 45 }}
                         animate={{
-                          strokeDashoffset: 2 * Math.PI * 44 * (1 - (currentStep + 1) / steps.length)
+                          strokeDashoffset: 2 * Math.PI * 45 * (1 - (currentStep + 1) / steps.length)
                         }}
                         transition={{ duration: 1, ease: "easeInOut" }}
                       />
@@ -936,21 +938,21 @@ export default function BuilderPage() {
                         </linearGradient>
                       </defs>
                     </svg>
-                    <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="relative z-10 flex items-center justify-center">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-teal-600">
+                        <div className="text-sm sm:text-base md:text-2xl font-bold text-teal-600">
                           {Math.round(((currentStep + 1) / steps.length) * 100)}%
                         </div>
-                        <div className="text-xs text-gray-500">Progress</div>
+                        <div className="text-xs sm:text-xs text-gray-500">Progress</div>
                       </div>
                     </div>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-800">Building Your Website</h3>
-                  <p className="text-sm text-gray-600 text-center">Step {currentStep + 1} of {steps.length}</p>
+                  <h3 className="text-xs sm:text-sm md:text-base font-bold text-gray-800 text-center">Building Website</h3>
+                  <p className="text-xs text-gray-600 text-center">Step {currentStep + 1} of {steps.length}</p>
                 </div>
 
                 {/* Step Navigation */}
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {steps.map((step, index) => {
                     const isActive = index === currentStep
                     const isCompleted = index < currentStep
@@ -962,17 +964,17 @@ export default function BuilderPage() {
                         onClick={() => goToStep(index)}
                         className="relative cursor-pointer group"
                       >
-                        <div className={`p-4 rounded-xl transition-all duration-300 ${
+                        <div className={`p-2.5 sm:p-4 rounded-xl transition-all duration-300 ${
                           isActive
                             ? 'bg-gradient-to-r from-teal-500 to-slate-600 text-white shadow-xl scale-105'
                             : isCompleted
                               ? 'bg-gradient-to-r from-teal-50 to-slate-50 hover:from-teal-100 hover:to-slate-100 border-2 border-teal-300 shadow-md'
                               : 'bg-white/50 border-2 border-gray-200 hover:border-gray-300'
                         }`}>
-                          <div className="flex items-start space-x-4">
+                          <div className="flex items-start space-x-2 sm:space-x-3">
                             {/* Step Number/Icon */}
                             <div
-                              className={`flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center ${
+                              className={`flex-shrink-0 w-7 h-7 sm:w-9 sm:h-9 rounded-xl flex items-center justify-center ${
                                 isActive
                                   ? 'bg-white/20 backdrop-blur-sm'
                                   : isCompleted
@@ -981,9 +983,9 @@ export default function BuilderPage() {
                               }`}
                             >
                               {isCompleted ? (
-                                <Check className="w-6 h-6 text-white" />
+                                <Check className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-white" />
                               ) : (
-                                <StepIcon className={`w-6 h-6 ${
+                                <StepIcon className={`w-3.5 sm:w-4 h-3.5 sm:h-4 ${
                                   isActive ? 'text-white' : isCompleted ? 'text-white' : 'text-gray-500'
                                 }`} />
                               )}
@@ -991,31 +993,31 @@ export default function BuilderPage() {
 
                             {/* Step Content */}
                             <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between mb-1">
+                              <div className="flex items-center justify-between mb-0.5 sm:mb-1">
                                 <span className={`text-xs font-semibold uppercase tracking-wide ${
                                   isActive ? 'text-teal-100' : 'text-gray-500'
                                 }`}>
                                   Step {index + 1}
                                 </span>
                                 {isCompleted && (
-                                  <Badge className="bg-teal-500 text-white text-xs px-2 py-0.5">
-                                    <Check className="w-3 h-3 mr-1" />
+                                  <Badge className="bg-teal-500 text-white text-xs px-1.5 py-0.5">
+                                    <Check className="w-2 h-2 mr-0.5" />
                                     Done
                                   </Badge>
                                 )}
                                 {isActive && (
-                                  <Badge className="bg-white/20 text-white text-xs px-2 py-0.5 backdrop-blur-sm">
-                                    <Zap className="w-3 h-3 mr-1" />
+                                  <Badge className="bg-white/20 text-white text-xs px-1.5 py-0.5 backdrop-blur-sm">
+                                    <Zap className="w-2 h-2 mr-0.5" />
                                     Active
                                   </Badge>
                                 )}
                               </div>
-                              <h4 className={`font-bold text-base mb-1 ${
+                              <h4 className={`font-bold text-xs sm:text-sm mb-0.5 sm:mb-1 ${
                                 isActive ? 'text-white' : isCompleted ? 'text-gray-900' : 'text-gray-700'
                               }`}>
                                 {step.title}
                               </h4>
-                              <p className={`text-sm ${
+                              <p className={`text-xs ${
                                 isActive ? 'text-teal-100' : 'text-gray-600'
                               }`}>
                                 {step.description}
@@ -1026,7 +1028,7 @@ export default function BuilderPage() {
 
                         {/* Vertical Connection Line */}
                         {index < steps.length - 1 && (
-                          <div className="absolute left-9 top-full w-0.5 h-3 bg-gradient-to-b from-teal-300 to-transparent" />
+                          <div className="absolute left-3.5 sm:left-4 top-full w-0.5 h-2 sm:h-3 bg-gradient-to-b from-teal-300 to-transparent" />
                         )}
                       </div>
                     )
@@ -1034,16 +1036,14 @@ export default function BuilderPage() {
                 </div>
               </div>
 
-              {/* Switch to Chat Button */}
-              <div className="p-4 pt-6 border-t border-gray-200/50 mt-6">
+              {/* Switch to Chat Button - Footer */}
+              <div className="border-t border-gray-200 bg-gray-50 p-3 sm:p-4">
                 <Button
                   onClick={handleSwitchToChat}
-                  variant="outline"
-                  className="w-full h-12 items-center justify-center gap-2 border-2 border-teal-400 hover:bg-teal-50 text-teal-700 font-medium transition-all duration-200"
+                  className="w-full h-10 sm:h-11 items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-slate-600 hover:from-teal-600 hover:to-slate-700 text-white font-medium transition-all duration-200 text-xs sm:text-sm shadow-md hover:shadow-lg"
                 >
-                  <MessageSquare className="w-4 h-4" />
+                  <MessageSquare className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
                   <span>Switch to Chat</span>
-                  <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </motion.div>
@@ -1053,12 +1053,12 @@ export default function BuilderPage() {
 
       {/* Form Content */}
       <div
-        className="pt-24 px-6 pb-16 bg-gradient-to-b from-transparent to-gray-50/30 transition-all duration-300"
+        className="pt-24 px-4 sm:px-6 pb-16 bg-gradient-to-b from-transparent to-gray-50/30 transition-all duration-300"
         style={{
           marginLeft: isDesktop ? (isSidebarCollapsed ? '5rem' : '20rem') : '0'
         }}
       >
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto w-full">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentStep}
@@ -1076,18 +1076,18 @@ export default function BuilderPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex items-center justify-between"
                       >
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-start gap-2 sm:gap-4">
                           <motion.div
-                            className="w-12 h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg"
+                            className="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
                             whileHover={{ scale: 1.05, rotate: 5 }}
                           >
-                            <Building2 className="w-7 h-7 text-white" />
+                            <Building2 className="w-5 sm:w-7 h-5 sm:h-7 text-white" />
                           </motion.div>
-                          <div>
-                            <CardTitle className="text-2xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
+                          <div className="min-w-0">
+                            <CardTitle className="text-lg sm:text-xl md:text-2xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
                               Business Information
                             </CardTitle>
-                            <CardDescription className="text-base text-gray-600 mt-1">
+                            <CardDescription className="text-xs sm:text-sm md:text-base text-gray-600 mt-1">
                               Tell us about your company and contact details
                             </CardDescription>
                           </div>
@@ -1104,36 +1104,36 @@ export default function BuilderPage() {
                         </motion.div>
                       </motion.div>
                     </CardHeader>
-                  <CardContent className="p-8">
-                    <Accordion type="single" defaultValue="company-details" collapsible className="space-y-6">
+                  <CardContent className="p-4 sm:p-6 md:p-8">
+                    <Accordion type="single" defaultValue="company-details" collapsible className="space-y-3 sm:space-y-4 md:space-y-6">
                       {/* Section 1: Company Details */}
                       <AccordionItem
                         value="company-details"
                         className="border-2 border-teal-200/50 rounded-2xl bg-gradient-to-br from-white to-teal-50/30 shadow-lg hover:shadow-xl transition-all duration-300"
                       >
-                        <AccordionTrigger className="hover:no-underline px-6 pt-6 pb-4">
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-4">
+                        <AccordionTrigger className="hover:no-underline px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 md:pb-4">
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0">
                               <motion.div
-                                className="w-12 h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg"
+                                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
                                 whileHover={{ scale: 1.05, rotate: 5 }}
                               >
-                                <Building2 className="w-6 h-6 text-white" />
+                                <Building2 className="w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6 text-white" />
                               </motion.div>
-                              <div className="text-left">
-                                <h3 className="text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
+                              <div className="text-left min-w-0">
+                                <h3 className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
                                   Company Details
                                 </h3>
-                                <p className="text-sm text-gray-600 font-normal">Basic company information and description</p>
+                                <p className="text-xs sm:text-sm text-gray-600 font-normal hidden sm:block">Basic company information and description</p>
                               </div>
                             </div>
-                            <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-3 py-1">
-                              <Check className="w-3 h-3 mr-1" />
+                            <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm flex-shrink-0">
+                              <Check className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
                               Required
                             </Badge>
                           </div>
                         </AccordionTrigger>
-                        <AccordionContent className="px-6 pb-6 pt-2">
+                        <AccordionContent className="px-3 sm:px-4 md:px-6 pb-4 sm:pb-5 md:pb-6 pt-2 sm:pt-3">
                           <motion.div 
                       className="relative group"
                       initial={{ opacity: 0, y: 20 }}
@@ -1142,15 +1142,15 @@ export default function BuilderPage() {
                     >
                       <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 via-emerald-500/10 to-blue-500/10 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500"></div>
                       <div className="relative bg-white/80 backdrop-blur-sm rounded-2xl border border-white/50 shadow-lg hover:shadow-xl transition-all duration-300 p-6">
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center">
-                            <Building2 className="w-5 h-5 text-white" />
+                        <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Building2 className="w-3 sm:w-5 h-3 sm:h-5 text-white" />
                           </div>
-                          <h3 className="font-semibold text-lg text-gray-900">Company Details</h3>
+                          <h3 className="font-semibold text-sm sm:text-lg text-gray-900">Company Details</h3>
                         </div>
                         
                         <div className="space-y-6">
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
                             <motion.div 
                               className="space-y-2"
                               whileHover={{ scale: 1.02 }}
@@ -1264,7 +1264,7 @@ export default function BuilderPage() {
                             </motion.div>
                           </div>
                           
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
                             <motion.div 
                               className="space-y-2"
                               whileHover={{ scale: 1.02 }}
@@ -1345,29 +1345,29 @@ export default function BuilderPage() {
                         value="registration-details"
                         className="border-2 border-teal-200/50 rounded-2xl bg-gradient-to-br from-white to-teal-50/30 shadow-lg hover:shadow-xl transition-all duration-300"
                       >
-                        <AccordionTrigger className="hover:no-underline px-6 pt-6 pb-4">
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-4">
+                        <AccordionTrigger className="hover:no-underline px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 md:pb-4">
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0">
                               <motion.div
-                                className="w-12 h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg"
+                                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
                                 whileHover={{ scale: 1.05, rotate: 5 }}
                               >
-                                <Award className="w-6 h-6 text-white" />
+                                <Award className="w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6 text-white" />
                               </motion.div>
-                              <div className="text-left">
-                                <h3 className="text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
+                              <div className="text-left min-w-0">
+                                <h3 className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
                                   Business Registration
                                 </h3>
-                                <p className="text-sm text-gray-600 font-normal">GST and MSME registration details</p>
+                                <p className="text-xs sm:text-sm text-gray-600 font-normal hidden sm:block">GST and MSME registration details</p>
                               </div>
                             </div>
-                            <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-3 py-1">
-                              <Award className="w-3 h-3 mr-1" />
+                            <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm flex-shrink-0">
+                              <Award className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
                               Optional
                             </Badge>
                           </div>
                         </AccordionTrigger>
-                        <AccordionContent className="px-6 pb-6 pt-2">
+                        <AccordionContent className="px-3 sm:px-4 md:px-6 pb-4 sm:pb-5 md:pb-6 pt-2 sm:pt-3">
                           <motion.div
                             className="relative group"
                             initial={{ opacity: 0, y: 20 }}
@@ -1423,29 +1423,29 @@ export default function BuilderPage() {
                         value="contact-information"
                         className="border-2 border-teal-200/50 rounded-2xl bg-gradient-to-br from-white to-teal-50/30 shadow-lg hover:shadow-xl transition-all duration-300"
                       >
-                        <AccordionTrigger className="hover:no-underline px-6 pt-6 pb-4">
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-4">
+                        <AccordionTrigger className="hover:no-underline px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 md:pb-4">
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0">
                               <motion.div
-                                className="w-12 h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg"
+                                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
                                 whileHover={{ scale: 1.05, rotate: 5 }}
                               >
-                                <Phone className="w-6 h-6 text-white" />
+                                <Phone className="w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6 text-white" />
                               </motion.div>
-                              <div className="text-left">
-                                <h3 className="text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
+                              <div className="text-left min-w-0">
+                                <h3 className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
                                   Contact Information
                                 </h3>
-                                <p className="text-sm text-gray-600 font-normal">Email, phone, address and social media</p>
+                                <p className="text-xs sm:text-sm text-gray-600 font-normal hidden sm:block">Email, phone, address and social media</p>
                               </div>
                             </div>
-                            <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-3 py-1">
-                              <Phone className="w-3 h-3 mr-1" />
+                            <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm flex-shrink-0">
+                              <Phone className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
                               Required
                             </Badge>
                           </div>
                         </AccordionTrigger>
-                        <AccordionContent className="px-6 pb-6 pt-2">
+                        <AccordionContent className="px-3 sm:px-4 md:px-6 pb-4 sm:pb-5 md:pb-6 pt-2 sm:pt-3">
                           <motion.div
                             className="relative group"
                             initial={{ opacity: 0, y: 20 }}
@@ -1564,11 +1564,11 @@ export default function BuilderPage() {
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.6 }}
                         >
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center">
-                              <Globe className="w-5 h-5 text-white" />
+                          <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                              <Globe className="w-3 sm:w-5 h-3 sm:h-5 text-white" />
                             </div>
-                            <h4 className="font-semibold text-lg text-gray-900">Social Media</h4>
+                            <h4 className="font-semibold text-sm sm:text-lg text-gray-900">Social Media</h4>
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <motion.div whileHover={{ scale: 1.02 }}>
@@ -1671,29 +1671,29 @@ export default function BuilderPage() {
                         value="team-members"
                         className="border-2 border-teal-200/50 rounded-2xl bg-gradient-to-br from-white to-teal-50/30 shadow-lg hover:shadow-xl transition-all duration-300"
                       >
-                        <AccordionTrigger className="hover:no-underline px-6 pt-6 pb-4">
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-4">
+                        <AccordionTrigger className="hover:no-underline px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 md:pb-4">
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0">
                               <motion.div
-                                className="w-12 h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg"
+                                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
                                 whileHover={{ scale: 1.05, rotate: 5 }}
                               >
-                                <Users className="w-6 h-6 text-white" />
+                                <Users className="w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6 text-white" />
                               </motion.div>
-                              <div className="text-left">
-                                <h3 className="text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
+                              <div className="text-left min-w-0">
+                                <h3 className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
                                   Team Members
                                 </h3>
-                                <p className="text-sm text-gray-600 font-normal">Add your key team members and leadership</p>
+                                <p className="text-xs sm:text-sm text-gray-600 font-normal hidden sm:block">Add your key team members and leadership</p>
                               </div>
                             </div>
-                            <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-3 py-1">
-                              <Users className="w-3 h-3 mr-1" />
+                            <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm flex-shrink-0">
+                              <Users className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
                               Optional
                             </Badge>
                           </div>
                         </AccordionTrigger>
-                        <AccordionContent className="px-6 pb-6 pt-2">
+                        <AccordionContent className="px-3 sm:px-4 md:px-6 pb-4 sm:pb-5 md:pb-6 pt-2 sm:pt-3">
                           <motion.div
                             className="relative group"
                             initial={{ opacity: 0, y: 20 }}
@@ -1807,29 +1807,29 @@ export default function BuilderPage() {
                         value="export-markets"
                         className="border-2 border-teal-200/50 rounded-2xl bg-gradient-to-br from-white to-teal-50/30 shadow-lg hover:shadow-xl transition-all duration-300"
                       >
-                        <AccordionTrigger className="hover:no-underline px-6 pt-6 pb-4">
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-4">
+                        <AccordionTrigger className="hover:no-underline px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 md:pb-4">
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0">
                               <motion.div
-                                className="w-12 h-12 bg-gradient-to-br from-teal-500 to-slate-600  rounded-2xl flex items-center justify-center shadow-lg"
+                                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
                                 whileHover={{ scale: 1.05, rotate: -5 }}
                               >
-                                <Globe className="w-6 h-6 text-white" />
+                                <Globe className="w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6 text-white" />
                               </motion.div>
-                              <div className="text-left">
-                                <h3 className="text-xl font-bold bg-gradient-to-r from-teal-700 to-cyan-700 bg-clip-text text-transparent">
+                              <div className="text-left min-w-0">
+                                <h3 className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-teal-700 to-cyan-700 bg-clip-text text-transparent">
                                   Global Export Markets
                                 </h3>
-                                <p className="text-sm text-gray-600 font-normal">Select your target export destinations</p>
+                                <p className="text-xs sm:text-sm text-gray-600 font-normal hidden sm:block">Select your target export destinations</p>
                               </div>
                             </div>
-                            <Badge className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-3 py-1">
-                              <Globe className="w-3 h-3 mr-1" />
+                            <Badge className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm flex-shrink-0 whitespace-nowrap">
+                              <Globe className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
                               {businessInfo.export_countries.length} Selected
                             </Badge>
                           </div>
                         </AccordionTrigger>
-                        <AccordionContent className="px-6 pb-6 pt-2">
+                        <AccordionContent className="px-3 sm:px-4 md:px-6 pb-4 sm:pb-5 md:pb-6 pt-2 sm:pt-3">
                           <CardContent className="space-y-4">
                             {/* Country Selection */}
                             <motion.div
@@ -1861,7 +1861,7 @@ export default function BuilderPage() {
                             {/* Selected Countries - Compact Display */}
                             {businessInfo.export_countries.length > 0 ? (
                               <motion.div
-                                className="grid grid-cols-6 gap-4"
+                                className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-3 md:gap-4"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                               >
@@ -1906,29 +1906,29 @@ export default function BuilderPage() {
                         value="certifications"
                         className="border-2 border-teal-200/50 rounded-2xl bg-gradient-to-br from-white to-teal-50/30 shadow-lg hover:shadow-xl transition-all duration-300"
                       >
-                        <AccordionTrigger className="hover:no-underline px-6 pt-6 pb-4">
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-4">
+                        <AccordionTrigger className="hover:no-underline px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 md:pb-4">
+                          <div className="flex items-center justify-between w-full gap-2">
+                            <div className="flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0">
                               <motion.div
-                                className="w-12 h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg"
+                                className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
                                 whileHover={{ scale: 1.05, rotate: 10 }}
                               >
-                                <Award className="w-6 h-6 text-white" />
+                                <Award className="w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6 text-white" />
                               </motion.div>
-                              <div className="text-left">
-                                <h3 className="text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
-                                  Certifications & Credentials
+                              <div className="text-left min-w-0">
+                                <h3 className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
+                                  Certifications
                                 </h3>
-                                <p className="text-sm text-gray-600 font-normal">Select your quality standards and compliance certifications</p>
+                                <p className="text-xs sm:text-sm text-gray-600 font-normal hidden sm:block">Select your quality standards and compliance certifications</p>
                               </div>
                             </div>
-                            <Badge className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-3 py-1">
-                              <Award className="w-3 h-3 mr-1" />
+                            <Badge className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm flex-shrink-0 whitespace-nowrap">
+                              <Award className="w-2 h-2 sm:w-3 sm:h-3 mr-1" />
                               {businessInfo.certifications.length} Selected
                             </Badge>
                           </div>
                         </AccordionTrigger>
-                        <AccordionContent className="px-6 pb-6 pt-2">
+                        <AccordionContent className="px-3 sm:px-4 md:px-6 pb-4 sm:pb-5 md:pb-6 pt-2 sm:pt-3">
                           <CardContent className="space-y-4">
                             {/* Certification Selection */}
                             <motion.div
@@ -2044,162 +2044,162 @@ export default function BuilderPage() {
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="flex items-center gap-4"
+                      className="flex items-start gap-2 sm:gap-3 md:gap-4 w-full"
                     >
                       <motion.div
-                        className="w-12 h-12 bg-gradient-to-br from-teal-500 via-cyan-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg"
-                        animate={{ 
+                        className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-500 via-cyan-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
+                        animate={{
                           rotate: [0, 5, -5, 0],
                           scale: [1, 1.05, 1]
                         }}
-                        transition={{ 
+                        transition={{
                           duration: 2,
                           repeat: Infinity,
-                          repeatType: "reverse" 
+                          repeatType: "reverse"
                         }}
                       >
-                        <Sparkles className="w-7 h-7 text-white" />
+                        <Sparkles className="w-4 sm:w-5 md:w-7 h-4 sm:h-5 md:h-7 text-white" />
                       </motion.div>
-                      <div>
-                        <CardTitle className="text-2xl font-bold bg-gradient-to-r from-teal-700 via-cyan-700 to-slate-700 bg-clip-text text-transparent">
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="text-sm sm:text-base md:text-2xl font-bold bg-gradient-to-r from-teal-700 via-cyan-700 to-slate-700 bg-clip-text text-transparent">
                           Preview & Generate
                         </CardTitle>
-                        <CardDescription className="text-base text-gray-600 mt-1">
+                        <CardDescription className="text-xs sm:text-sm md:text-base text-gray-600 mt-1 hidden sm:block">
                           Review your configuration and generate your professional website
                         </CardDescription>
                       </div>
-                      <motion.div 
-                        className="ml-auto hidden md:block"
+                      <motion.div
+                        className="ml-auto hidden md:block flex-shrink-0"
                         animate={{ opacity: [0.5, 1, 0.5] }}
                         transition={{ duration: 2, repeat: Infinity }}
                       >
-                        <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-4 py-2">
-                          <Rocket className="w-4 h-4 mr-2" />
+                        <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-2 py-1 sm:px-3 md:px-4 text-xs sm:text-sm">
+                          <Rocket className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                           Ready to Launch
                         </Badge>
                       </motion.div>
                     </motion.div>
                   </CardHeader>
-                  <CardContent className="p-8">
-                    <div className="space-y-8">
+                  <CardContent className="p-4 sm:p-6 md:p-8">
+                    <div className="space-y-4 sm:space-y-6 md:space-y-8">
                       <motion.div 
                         className="bg-gradient-to-br from-teal-50/50 via-slate-50/50 to-gray-50/50 p-8 rounded-2xl border border-teal-100/50 shadow-inner"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                       >
-                        <div className="flex items-center gap-3 mb-6">
-                          <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center">
-                            <Layout className="w-5 h-5 text-white" />
+                        <div className="flex items-center gap-2 sm:gap-3 md:gap-4 mb-4 sm:mb-6">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Layout className="w-3 sm:w-5 h-3 sm:h-5 text-white" />
                           </div>
-                          <h3 className="text-xl font-bold text-gray-900">Website Configuration Summary</h3>
-                          <div className="ml-auto flex items-center gap-2">
+                          <h3 className="text-sm sm:text-lg md:text-xl font-bold text-gray-900">Website Configuration Summary</h3>
+                          <div className="ml-auto flex items-center gap-1 sm:gap-2">
                             <motion.div
                               animate={{ rotate: 360 }}
                               transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                             >
-                              <Code className="w-5 h-5 text-teal-500" />
+                              <Code className="w-4 sm:w-5 h-4 sm:h-5 text-teal-500" />
                             </motion.div>
-                            <span className="text-sm text-gray-500">AI Optimized</span>
+                            <span className="text-xs sm:text-sm text-gray-500">AI Optimized</span>
                           </div>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                          <motion.div 
-                            className="bg-gradient-to-br from-teal-50 to-slate-100 p-6 rounded-2xl border border-teal-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+                          <motion.div
+                            className="bg-gradient-to-br from-teal-50 to-slate-100 p-3 sm:p-5 md:p-6 rounded-2xl border border-teal-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
                             whileHover={{ scale: 1.02, y: -2 }}
                           >
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center">
-                                <Building2 className="w-5 h-5 text-white" />
+                            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Building2 className="w-3 sm:w-5 h-3 sm:h-5 text-white" />
                               </div>
-                              <p className="text-sm font-semibold text-teal-700 uppercase tracking-wide">Company</p>
+                              <p className="text-xs sm:text-sm font-semibold text-teal-700 uppercase tracking-wide">Company</p>
                             </div>
-                            <p className="font-bold text-lg text-gray-900 mb-1">{businessInfo.company_name || 'Not specified'}</p>
-                            <p className="text-sm text-teal-600 font-medium">{businessInfo.company_type || 'Type not specified'}</p>
+                            <p className="font-bold text-base sm:text-lg text-gray-900 mb-1">{businessInfo.company_name || 'Not specified'}</p>
+                            <p className="text-xs sm:text-sm text-teal-600 font-medium">{businessInfo.company_type || 'Type not specified'}</p>
                           </motion.div>
-                          
-                          <motion.div 
-                            className="bg-gradient-to-br from-teal-50 to-slate-100 p-6 rounded-2xl border border-teal-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
+
+                          <motion.div
+                            className="bg-gradient-to-br from-teal-50 to-slate-100 p-3 sm:p-5 md:p-6 rounded-2xl border border-teal-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
                             whileHover={{ scale: 1.02, y: -2 }}
                           >
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center">
-                                <Package className="w-5 h-5 text-white" />
+                            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Package className="w-3 sm:w-5 h-3 sm:h-5 text-white" />
                               </div>
-                              <p className="text-sm font-semibold text-teal-700 uppercase tracking-wide">Products</p>
+                              <p className="text-xs sm:text-sm font-semibold text-teal-700 uppercase tracking-wide">Products</p>
                             </div>
-                            <p className="font-bold text-lg text-gray-900 mb-1">{businessInfo.categories.length} Categories</p>
-                            <p className="text-sm text-teal-600 font-medium">
+                            <p className="font-bold text-base sm:text-lg text-gray-900 mb-1">{businessInfo.categories.length} Categories</p>
+                            <p className="text-xs sm:text-sm text-teal-600 font-medium">
                               {businessInfo.categories.reduce((total, cat) => total + cat.products.length, 0)} Products Total
                             </p>
                           </motion.div>
-                          
-                          <motion.div 
-                            className="bg-gradient-to-br from-teal-50 to-slate-100 p-6 rounded-2xl border border-teal-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
+
+                          <motion.div
+                            className="bg-gradient-to-br from-teal-50 to-slate-100 p-3 sm:p-5 md:p-6 rounded-2xl border border-teal-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
                             whileHover={{ scale: 1.02, y: -2 }}
                           >
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center">
-                                <Globe className="w-5 h-5 text-white" />
+                            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Globe className="w-3 sm:w-5 h-3 sm:h-5 text-white" />
                               </div>
-                              <p className="text-sm font-semibold text-teal-700 uppercase tracking-wide">Markets</p>
+                              <p className="text-xs sm:text-sm font-semibold text-teal-700 uppercase tracking-wide">Markets</p>
                             </div>
-                            <p className="font-bold text-lg text-gray-900 mb-1">{businessInfo.export_countries.length} Countries</p>
-                            <p className="text-sm text-teal-600 font-medium">Global Export Markets</p>
+                            <p className="font-bold text-base sm:text-lg text-gray-900 mb-1">{businessInfo.export_countries.length} Countries</p>
+                            <p className="text-xs sm:text-sm text-teal-600 font-medium">Global Export Markets</p>
                           </motion.div>
-                          
-                          <motion.div 
-                            className="bg-gradient-to-br from-teal-50 to-slate-100 p-6 rounded-2xl border border-teal-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
+
+                          <motion.div
+                            className="bg-gradient-to-br from-teal-50 to-slate-100 p-3 sm:p-5 md:p-6 rounded-2xl border border-teal-200/50 shadow-lg hover:shadow-xl transition-all duration-300"
                             whileHover={{ scale: 1.02, y: -2 }}
                           >
-                            <div className="flex items-center gap-3 mb-3">
-                              <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center">
-                                <Award className="w-5 h-5 text-white" />
+                            <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3">
+                              <div className="w-6 h-6 sm:w-8 sm:h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <Award className="w-3 sm:w-5 h-3 sm:h-5 text-white" />
                               </div>
-                              <p className="text-sm font-semibold text-teal-700 uppercase tracking-wide">Certifications</p>
+                              <p className="text-xs sm:text-sm font-semibold text-teal-700 uppercase tracking-wide">Certifications</p>
                             </div>
-                            <p className="font-bold text-lg text-gray-900 mb-1">{businessInfo.certifications.filter(c => c.name.trim()).length} Certificates</p>
-                            <p className="text-sm text-teal-600 font-medium">Quality Standards</p>
+                            <p className="font-bold text-base sm:text-lg text-gray-900 mb-1">{businessInfo.certifications.filter(c => c.name.trim()).length} Certificates</p>
+                            <p className="text-xs sm:text-sm text-teal-600 font-medium">Quality Standards</p>
                           </motion.div>
                         </div>
                       </motion.div>
 
-                      <motion.div 
-                        className="bg-gradient-to-r from-teal-50 via-cyan-50 to-slate-50 border-2 border-teal-200/50 rounded-2xl p-6 shadow-lg"
+                      <motion.div
+                        className="bg-gradient-to-r from-teal-50 via-cyan-50 to-slate-50 border-2 border-teal-200/50 rounded-2xl p-4 sm:p-6 shadow-lg"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.2 }}
                       >
-                        <div className="flex items-start gap-4">
+                        <div className="flex items-start gap-2 sm:gap-3 md:gap-4">
                           <motion.div
-                            className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center"
-                            animate={{ 
+                            className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-xl flex items-center justify-center flex-shrink-0"
+                            animate={{
                               rotate: [0, 360],
                               scale: [1, 1.1, 1]
                             }}
-                            transition={{ 
+                            transition={{
                               duration: 3,
                               repeat: Infinity,
                               ease: "easeInOut"
                             }}
                           >
-                            <Sparkles className="w-6 h-6 text-white" />
+                            <Sparkles className="w-4 sm:w-6 h-4 sm:h-6 text-white" />
                           </motion.div>
-                          <div className="flex-1">
-                            <h4 className="font-bold text-xl text-teal-900 mb-2">Ready to Generate Your Website!</h4>
-                            <p className="text-teal-700 leading-relaxed">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-bold text-base sm:text-lg md:text-xl text-teal-900 mb-2">Ready to Generate Your Website!</h4>
+                            <p className="text-xs sm:text-sm md:text-base text-teal-700 leading-relaxed">
                               Your website configuration is complete and optimized. Click &quot;Generate Website&quot; below to create your professional Next.js website with AI-powered design and content generation.
                             </p>
-                            <div className="flex items-center gap-4 mt-4">
-                              <Badge className="bg-teal-100 border-teal-300 text-teal-700">
-                                <Check className="w-3 h-3 mr-1" />
+                            <div className="flex flex-wrap items-center gap-1 sm:gap-2 md:gap-3 mt-3 sm:mt-4">
+                              <Badge className="bg-teal-100 border-teal-300 text-teal-700 text-xs">
+                                <Check className="w-2 h-2 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
                                 Configuration Complete
                               </Badge>
-                              <Badge className="bg-cyan-100 border-cyan-300 text-cyan-700">
-                                <Zap className="w-3 h-3 mr-1" />
+                              <Badge className="bg-cyan-100 border-cyan-300 text-cyan-700 text-xs">
+                                <Zap className="w-2 h-2 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
                                 AI Optimized
                               </Badge>
-                              <Badge className="bg-teal-100 border-teal-300 text-teal-700">
-                                <Code className="w-3 h-3 mr-1" />
+                              <Badge className="bg-teal-100 border-teal-300 text-teal-700 text-xs">
+                                <Code className="w-2 h-2 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
                                 Production Ready
                               </Badge>
                             </div>
@@ -2207,27 +2207,27 @@ export default function BuilderPage() {
                         </div>
                       </motion.div>
 
-                      <motion.div 
-                        className="flex flex-col md:flex-row gap-6"
+                      <motion.div
+                        className="flex flex-col md:flex-row gap-3 sm:gap-4 md:gap-6"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
                       >
                         <motion.div className="flex-1">
-                          <Button 
+                          <Button
                             onClick={generateWebsite}
                             disabled={isGenerating || !businessInfo.company_name || !businessInfo.company_type}
-                            className="w-full bg-gradient-to-r from-teal-600 via-cyan-600 to-slate-600 hover:from-teal-700 hover:via-cyan-700 hover:to-slate-700 text-white text-lg py-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold"
+                            className="w-full bg-gradient-to-r from-teal-600 via-cyan-600 to-slate-600 hover:from-teal-700 hover:via-cyan-700 hover:to-slate-700 text-white text-sm sm:text-base md:text-lg py-3 sm:py-5 md:py-8 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 font-semibold"
                             size="lg"
                           >
                             {isGenerating ? (
-                              <motion.div 
-                                className="flex items-center gap-3"
+                              <motion.div
+                                className="flex items-center gap-2 sm:gap-3"
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                               >
-                                <motion.div 
-                                  className="w-6 h-6 border-3 border-white border-t-transparent rounded-full"
+                                <motion.div
+                                  className="w-4 h-4 sm:w-6 sm:h-6 border-2 sm:border-3 border-white border-t-transparent rounded-full"
                                   animate={{ rotate: 360 }}
                                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                                 />
@@ -2239,43 +2239,43 @@ export default function BuilderPage() {
                                 </motion.span>
                               </motion.div>
                             ) : (
-                              <motion.div 
-                                className="flex items-center gap-3"
+                              <motion.div
+                                className="flex items-center gap-2 sm:gap-3"
                                 whileHover={{ scale: 1.02 }}
                                 whileTap={{ scale: 0.98 }}
                               >
-                                <Rocket className="w-6 h-6" />
+                                <Rocket className="w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6" />
                                 Generate Website
-                                <ChevronRight className="w-5 h-5 ml-1" />
+                                <ChevronRight className="w-4 sm:w-5 md:w-5 h-4 sm:h-5 md:h-5 ml-1" />
                               </motion.div>
                             )}
                           </Button>
                         </motion.div>
                         
-                        <div className="flex flex-col md:flex-row gap-3">
+                        <div className="flex flex-col md:flex-row gap-2 sm:gap-3 md:gap-4">
                           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                            <Button 
-                              variant="outline" 
-                              className="w-full md:w-auto py-6 px-6 border-2 border-cyan-200 hover:border-cyan-400 hover:bg-cyan-50 transition-all duration-300 rounded-xl"
+                            <Button
+                              variant="outline"
+                              className="w-full md:w-auto py-2 px-4 sm:py-3 sm:px-5 md:py-4 md:px-6 border-2 border-cyan-200 hover:border-cyan-400 hover:bg-cyan-50 transition-all duration-300 rounded-xl text-xs sm:text-sm md:text-base"
                               onClick={saveToCloud}
                               disabled={!businessInfo.company_name || !businessInfo.company_type}
                             >
-                              <Cloud className="w-5 h-5 mr-2" />
+                              <Cloud className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2" />
                               Save to Cloud
                             </Button>
                           </motion.div>
 
                           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                            <Button 
-                              variant="outline" 
-                              className="w-full md:w-auto py-6 px-6 border-2 border-gray-200 hover:border-teal-300 hover:bg-teal-50 transition-all duration-300 rounded-xl"
+                            <Button
+                              variant="outline"
+                              className="w-full md:w-auto py-2 px-4 sm:py-3 sm:px-5 md:py-4 md:px-6 border-2 border-gray-200 hover:border-teal-300 hover:bg-teal-50 transition-all duration-300 rounded-xl text-xs sm:text-sm md:text-base"
                               onClick={async () => {
                                 const jsonData = {
                                   business_info: businessInfo,
                                   website_config: websiteConfig
                                 }
                                 const jsonString = JSON.stringify(jsonData, null, 2)
-                                
+
                                 try {
                                   if (navigator.clipboard && window.isSecureContext) {
                                     await navigator.clipboard.writeText(jsonString)
@@ -2296,15 +2296,15 @@ export default function BuilderPage() {
                                 }
                               }}
                             >
-                              <FileText className="w-5 h-5 mr-2" />
+                              <FileText className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2" />
                               Copy Config
                             </Button>
                           </motion.div>
 
                           <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                            <Button 
-                              variant="outline" 
-                              className="w-full md:w-auto py-6 px-6 border-2 border-gray-200 hover:border-teal-300 hover:bg-teal-50 transition-all duration-300 rounded-xl"
+                            <Button
+                              variant="outline"
+                              className="w-full md:w-auto py-2 px-4 sm:py-3 sm:px-5 md:py-4 md:px-6 border-2 border-gray-200 hover:border-teal-300 hover:bg-teal-50 transition-all duration-300 rounded-xl text-xs sm:text-sm md:text-base"
                               onClick={() => {
                                 const jsonData = {
                                   business_info: businessInfo,
@@ -2320,7 +2320,7 @@ export default function BuilderPage() {
                                 toast.success('✓ Configuration downloaded!')
                               }}
                             >
-                              <Download className="w-5 h-5 mr-2" />
+                              <Download className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-1 sm:mr-2" />
                               Download Config
                             </Button>
                           </motion.div>
@@ -2328,42 +2328,42 @@ export default function BuilderPage() {
                       </motion.div>
 
                       {(!businessInfo.company_name || !businessInfo.company_type) && (
-                        <motion.div 
-                          className="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200/50 rounded-2xl p-6 shadow-lg"
+                        <motion.div
+                          className="bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-200/50 rounded-2xl p-4 sm:p-6 shadow-lg"
                           initial={{ opacity: 0, scale: 0.9 }}
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.9 }}
                         >
-                          <div className="flex items-start gap-4">
-                            <motion.div 
-                              className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center"
-                              animate={{ 
+                          <div className="flex items-start gap-2 sm:gap-3 md:gap-4">
+                            <motion.div
+                              className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-br from-red-500 to-pink-600 rounded-xl flex items-center justify-center flex-shrink-0"
+                              animate={{
                                 scale: [1, 1.1, 1],
                                 rotate: [0, -5, 5, 0]
                               }}
-                              transition={{ 
+                              transition={{
                                 duration: 2,
                                 repeat: Infinity
                               }}
                             >
-                              <X className="w-6 h-6 text-white" />
+                              <X className="w-4 sm:w-6 h-4 sm:h-6 text-white" />
                             </motion.div>
-                            <div>
-                              <h4 className="font-bold text-lg text-red-900 mb-2">Missing Required Information</h4>
-                              <p className="text-red-700 leading-relaxed">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-bold text-base sm:text-lg text-red-900 mb-2">Missing Required Information</h4>
+                              <p className="text-xs sm:text-sm md:text-base text-red-700 leading-relaxed">
                                 Please complete the <strong>Company Name</strong> and <strong>Business Type</strong> fields in Step 1 before generating your website.
                               </p>
-                              <motion.div 
-                                className="mt-4"
+                              <motion.div
+                                className="mt-3 sm:mt-4"
                                 whileHover={{ scale: 1.02 }}
                               >
                                 <Button
                                   variant="outline"
                                   size="sm"
                                   onClick={() => goToStep(0)}
-                                  className="border-red-300 text-red-700 hover:bg-red-50"
+                                  className="border-red-300 text-red-700 hover:bg-red-50 text-xs sm:text-sm"
                                 >
-                                  <ArrowLeft className="w-4 h-4 mr-2" />
+                                  <ArrowLeft className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                                   Go Back to Step 1
                                 </Button>
                               </motion.div>
@@ -2379,8 +2379,8 @@ export default function BuilderPage() {
           </AnimatePresence>
 
           {/* Enhanced Navigation Buttons */}
-          <motion.div 
-            className="flex justify-between items-center mt-12 p-6 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-2xl border border-gray-200/50"
+          <motion.div
+            className="flex flex-row justify-between items-center gap-1 sm:gap-3 md:gap-4 mt-6 sm:mt-8 md:mt-12 p-1.5 sm:p-3 md:p-6 bg-gradient-to-r from-gray-50 to-gray-100/50 rounded-2xl border border-gray-200/50"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
@@ -2389,30 +2389,31 @@ export default function BuilderPage() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={prevStep}
                 disabled={currentStep === 0}
-                className={`py-4 px-8 rounded-xl border-2 font-semibold transition-all duration-300 ${
-                  currentStep === 0 
-                    ? 'opacity-50 cursor-not-allowed' 
+                className={`py-1.5 px-2 sm:py-3 sm:px-5 md:py-4 md:px-8 rounded-xl border-2 font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base ${
+                  currentStep === 0
+                    ? 'opacity-50 cursor-not-allowed'
                     : 'border-gray-300 hover:border-teal-400 hover:bg-teal-50 hover:text-teal-700'
                 }`}
                 size="lg"
               >
-                <ArrowLeft className="w-5 h-5 mr-3" />
-                Previous Step
+                <ArrowLeft className="w-2.5 h-2.5 sm:w-4 sm:h-4 md:w-5 md:h-5 mr-0 sm:mr-1 md:mr-2" />
+                <span className="hidden sm:inline">Previous Step</span>
+                <span className="sm:hidden">Back</span>
               </Button>
             </motion.div>
-            
-            <div className="flex items-center gap-4 text-sm text-gray-500">
+
+            <div className="flex items-center gap-1 sm:gap-3 text-xs sm:text-sm text-gray-500 flex-shrink-0">
               <div className="hidden md:flex items-center gap-2">
-                <span>Progress:</span>
+                <span className="text-xs md:text-sm">Progress:</span>
                 <div className="flex gap-1">
                   {steps.map((_, index) => (
                     <motion.div
                       key={index}
-                      className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                      className={`w-1 h-1 sm:w-1.5 sm:h-1.5 md:w-2 md:h-2 rounded-full transition-all duration-300 ${
                         index <= currentStep ? 'bg-teal-500' : 'bg-gray-300'
                       }`}
                       initial={{ scale: 0 }}
@@ -2422,27 +2423,27 @@ export default function BuilderPage() {
                   ))}
                 </div>
               </div>
-              <span className="font-medium">
-                {currentStep + 1} of {steps.length}
+              <span className="font-medium text-xs sm:text-sm whitespace-nowrap">
+                {currentStep + 1}/{steps.length}
               </span>
             </div>
-            
+
             <motion.div
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
-              <Button 
+              <Button
                 onClick={nextStep}
                 disabled={currentStep === steps.length - 1}
-                className={`py-4 px-8 rounded-xl font-semibold transition-all duration-300 ${
+                className={`py-1.5 px-2 sm:py-3 sm:px-6 md:py-4 md:px-8 rounded-xl font-semibold transition-all duration-300 text-xs sm:text-sm md:text-base ${
                   currentStep === steps.length - 1
-                    ? 'opacity-50 cursor-not-allowed bg-gray-400' 
+                    ? 'opacity-50 cursor-not-allowed bg-gray-400'
                     : 'bg-gradient-to-r from-teal-600 to-slate-600 hover:from-teal-700 hover:to-slate-700 text-white shadow-lg hover:shadow-xl'
                 }`}
                 size="lg"
               >
                 {currentStep === steps.length - 2 ? 'Review & Generate' : 'Next Step'}
-                <ArrowRight className="w-5 h-5 ml-3" />
+                <ArrowRight className="w-2.5 h-2.5 sm:w-4 sm:h-4 md:w-5 md:h-5 ml-0 sm:ml-1 md:ml-2" />
               </Button>
             </motion.div>
           </motion.div>

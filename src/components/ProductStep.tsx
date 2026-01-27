@@ -353,70 +353,70 @@ export function ProductStep({
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="flex items-center gap-4"
+            className="flex items-center gap-2 sm:gap-3 md:gap-4"
           >
             <motion.div
-              className="w-12 h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg"
+              className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
               whileHover={{ scale: 1.05, rotate: 5 }}
             >
-              <Package className="w-7 h-7 text-white" />
+              <Package className="w-4 sm:w-5 md:w-7 h-4 sm:h-5 md:h-7 text-white" />
             </motion.div>
-            <div>
-              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
+            <div className="min-w-0">
+              <CardTitle className="text-sm sm:text-lg md:text-2xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
                 Product Categories & Services
               </CardTitle>
-              <CardDescription className="text-base text-gray-600 mt-1">
+              <CardDescription className="text-xs sm:text-sm md:text-base text-gray-600 mt-1 hidden sm:block">
                 Define your product categories and showcase your offerings with detailed information
               </CardDescription>
             </div>
-            <motion.div 
-              className="ml-auto hidden md:block"
+            <motion.div
+              className="ml-auto hidden md:block flex-shrink-0"
               animate={{ rotate: [0, 10, -10, 0] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-4 py-2">
-                <Sparkles className="w-4 h-4 mr-2" />
+              <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-2 py-1 sm:px-3 sm:py-1.5 md:px-4 md:py-2 text-xs sm:text-sm">
+                <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                 Step 2 of 4
               </Badge>
             </motion.div>
           </motion.div>
         </CardHeader>
-        <CardContent className="p-8">
+        <CardContent className="p-4 sm:p-6 md:p-8">
           {/* Main Accordion Wrapper */}
-          <Accordion type="single" defaultValue="categories-products" collapsible className="space-y-6">
+          <Accordion type="single" defaultValue="categories-products" collapsible className="space-y-4 sm:space-y-6">
 
             {/* Section 1: Categories and Products */}
             <AccordionItem
               value="categories-products"
               className="border-2 border-teal-200/50 rounded-2xl bg-gradient-to-br from-white to-teal-50/30 shadow-lg hover:shadow-xl transition-all duration-300"
             >
-              <AccordionTrigger className="hover:no-underline px-6 pt-6 pb-4">
-                <div className="flex items-center justify-between w-full">
-                  <div className="flex items-center gap-4">
+              <AccordionTrigger className="hover:no-underline px-3 sm:px-4 md:px-6 pt-3 sm:pt-4 md:pt-6 pb-2 sm:pb-3 md:pb-4">
+                <div className="flex items-center justify-between w-full gap-2">
+                  <div className="flex items-center gap-2 sm:gap-3 md:gap-4 min-w-0">
                     <motion.div
-                      className="w-12 h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg"
+                      className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-gradient-to-br from-teal-500 to-slate-600 rounded-2xl flex items-center justify-center shadow-lg flex-shrink-0"
                       whileHover={{ scale: 1.05, rotate: 5 }}
                     >
-                      <Package className="w-6 h-6 text-white" />
+                      <Package className="w-4 sm:w-5 md:w-6 h-4 sm:h-5 md:h-6 text-white" />
                     </motion.div>
-                    <div className="text-left">
-                      <h3 className="text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
+                    <div className="text-left min-w-0">
+                      <h3 className="text-sm sm:text-base md:text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
                         Categories and Products
                       </h3>
-                      <p className="text-sm text-gray-600 font-normal">Organize your products into categories</p>
+                      <p className="text-xs sm:text-sm text-gray-600 font-normal hidden sm:block">Organize your products into categories</p>
                     </div>
                   </div>
-                  <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-3 py-1">
-                    <Package className="w-3 h-3 mr-1" />
+                  <Badge className="bg-gradient-to-r from-teal-500 to-slate-500 text-white px-2 py-0.5 sm:px-3 sm:py-1 text-xs sm:text-sm flex-shrink-0 whitespace-nowrap">
+                    <Package className="w-2 h-2 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
                     {categories.filter(c => c.name?.trim()).length} Categories
                   </Badge>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-6 pb-6 pt-2">
+              <AccordionContent className="px-3 sm:px-4 md:px-6 pb-4 sm:pb-5 md:pb-6 pt-2 sm:pt-3">
                 {/* Category Management */}
-                <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-gray-600 flex items-center gap-1">
-                    <CheckCircle className="w-4 h-4 text-teal-600" />
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 gap-2">
+                  <p className="text-xs sm:text-sm text-gray-600 flex items-center gap-1">
+                    <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-teal-600 flex-shrink-0" />
                     {categories.filter(c => c.name?.trim()).length > 0
                       ? `${categories.filter(c => c.name?.trim()).length} categories added`
                       : 'No categories added yet'}
@@ -424,9 +424,9 @@ export function ProductStep({
                   <Button
                     onClick={addCategory}
                     size="sm"
-                    className="bg-gradient-to-r from-teal-500 to-slate-600 text-white hover:shadow-md"
+                    className="bg-gradient-to-r from-teal-500 to-slate-600 text-white hover:shadow-md text-xs sm:text-sm py-1 sm:py-2 px-2 sm:px-3"
                   >
-                    <Plus className="w-4 h-4 mr-2" />
+                    <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                     Add Category
                   </Button>
                 </div>
@@ -443,31 +443,31 @@ export function ProductStep({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: categoryIndex * 0.1 }}
               >
-                <AccordionItem 
-                  value={`category-${categoryIndex}`} 
-                  className="border-2 border-teal-200/50 rounded-2xl p-6 bg-gradient-to-br from-white to-slate-50/30 shadow-lg hover:shadow-xl transition-all duration-300"
+                <AccordionItem
+                  value={`category-${categoryIndex}`}
+                  className="border-2 border-teal-200/50 rounded-2xl p-3 sm:p-4 md:p-6 bg-gradient-to-br from-white to-slate-50/30 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
-                  <AccordionTrigger className="hover:no-underline">
-                    <div className="flex items-center justify-between w-full">
-                      <div className="flex items-center gap-4">
+                  <AccordionTrigger className="hover:no-underline px-2 sm:px-3">
+                    <div className="flex items-center justify-between w-full gap-2">
+                      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                         <motion.div
-                          className="w-10 h-10 bg-gradient-to-br from-teal-500 to-slate-600 rounded-xl flex items-center justify-center shadow-md"
+                          className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 bg-gradient-to-br from-teal-500 to-slate-600 rounded-xl flex items-center justify-center shadow-md flex-shrink-0"
                           whileHover={{ scale: 1.05 }}
                         >
-                          <span className="text-white font-bold">{categoryIndex + 1}</span>
+                          <span className="text-white font-bold text-sm sm:text-base">{categoryIndex + 1}</span>
                         </motion.div>
-                        <div>
+                        <div className="min-w-0">
                           <Badge
                             variant="outline"
-                            className="mb-2 bg-teal-100 border-teal-300 text-teal-700">
+                            className="mb-1 bg-teal-100 border-teal-300 text-teal-700 text-xs">
 
-                            <Star className="w-3 h-3 mr-1" />
+                            <Star className="w-2 h-2 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
                             Category {categoryIndex + 1}
                           </Badge>
-                          <div className="font-semibold text-lg text-gray-900">
+                          <div className="font-semibold text-sm sm:text-base md:text-lg text-gray-900 truncate">
                             {category.name || `Unnamed Category ${categoryIndex + 1}`}
                           </div>
-                          <div className="text-sm text-gray-600">
+                          <div className="text-xs sm:text-sm text-gray-600 hidden sm:block">
                             {category.products.length} product{category.products.length !== 1 ? 's' : ''} configured
                           </div>
                         </div>
@@ -478,11 +478,11 @@ export function ProductStep({
                             e.stopPropagation()
                             removeCategory(categoryIndex)
                           }}
-                          className="p-3 rounded-xl bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700 cursor-pointer transition-all duration-300"
+                          className="p-2 sm:p-2.5 rounded-xl bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700 cursor-pointer transition-all duration-300 flex-shrink-0"
                           whileHover={{ scale: 1.05 }}
                           whileTap={{ scale: 0.95 }}
                         >
-                          <Trash2 className="w-5 h-5" />
+                          <Trash2 className="w-4 sm:w-5 h-4 sm:h-5" />
                         </motion.div>
                       )}
                     </div>
@@ -501,125 +501,125 @@ export function ProductStep({
 
 
                     {/* Products in Category */}
-                    <motion.div 
-                      className="bg-gradient-to-br from-teal-50/50 to-slate-50/50 rounded-2xl p-6 border border-teal-100/50"
+                    <motion.div
+                      className="bg-gradient-to-br from-teal-50/50 to-slate-50/50 rounded-2xl p-3 sm:p-4 md:p-6 border border-teal-100/50"
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
                     >
-                      <div className="flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center">
-                            <Package className="w-5 h-5 text-white" />
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3 sm:mb-4 md:mb-6 gap-2">
+                        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                          <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <Package className="w-3 sm:w-4 md:w-5 h-3 sm:h-4 md:h-5 text-white" />
                           </div>
-                          <h4 className="font-semibold text-lg text-gray-900">Products Portfolio</h4>
-                          <Badge className="bg-teal-100 border-teal-300 text-teal-700">
+                          <h4 className="font-semibold text-sm sm:text-base md:text-lg text-gray-900">Products Portfolio</h4>
+                          <Badge className="bg-teal-100 border-teal-300 text-teal-700 text-xs sm:text-sm px-2 py-0.5">
                             {category.products.length} items
                           </Badge>
                         </div>
                         <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                           <Button
                             onClick={() => openAddProductModal(categoryIndex)}
-                            className="bg-gradient-to-r from-teal-500 to-slate-600 text-white hover:shadow-md px-4 py-2 rounded-xl"
+                            className="bg-gradient-to-r from-teal-500 to-slate-600 text-white hover:shadow-md px-3 py-1.5 sm:px-4 sm:py-2 md:px-5 md:py-2.5 rounded-xl text-xs sm:text-sm"
                           >
-                            <Plus className="w-4 h-4 mr-2" />
+                            <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                             Add New Product
                           </Button>
                         </motion.div>
                       </div>
 
                       {category.products.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 md:gap-4">
                           {category.products.map((product, productIndex) => (
                           <motion.div
                             key={productIndex}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: productIndex * 0.1 }}
-                            className="border-2 border-teal-200/50 rounded-2xl p-6 bg-gradient-to-br from-white to-slate-50/30 shadow-lg hover:shadow-xl transition-all duration-300 relative"
+                            className="border-2 border-teal-200/50 rounded-2xl p-3 sm:p-4 md:p-6 bg-gradient-to-br from-white to-slate-50/30 shadow-lg hover:shadow-xl transition-all duration-300 relative"
                             whileHover={{ y: -2, scale: 1.02 }}
                           >
                             {/* Product Card Header */}
-                            <div className="flex items-start justify-between mb-4">
-                              <div className="flex items-center gap-3">
+                            <div className="flex items-start justify-between mb-3 sm:mb-4 gap-2">
+                              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                                 <motion.div
-                                  className="w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center shadow-md"
+                                  className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center shadow-md flex-shrink-0"
                                   whileHover={{ rotate: 10 }}
                                 >
-                                  <span className="text-white font-bold text-sm">{productIndex + 1}</span>
+                                  <span className="text-white font-bold text-xs sm:text-sm">{productIndex + 1}</span>
                                 </motion.div>
-                                <Badge 
-                                  variant="secondary" 
-                                  className="bg-teal-100 border-teal-300 text-teal-700"
+                                <Badge
+                                  variant="secondary"
+                                  className="bg-teal-100 border-teal-300 text-teal-700 text-xs px-2 py-0.5"
                                 >
-                                  <Package className="w-3 h-3 mr-1" />
+                                  <Package className="w-2 h-2 sm:w-3 sm:h-3 mr-0.5 sm:mr-1" />
                                   Product
                                 </Badge>
                               </div>
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
                                 <motion.button
                                   onClick={() => openEditProductModal(categoryIndex, productIndex)}
-                                  className="p-2 rounded-lg bg-teal-100 text-teal-600 hover:bg-teal-200 hover:text-teal-700 transition-colors"
+                                  className="p-1.5 sm:p-2 rounded-lg bg-teal-100 text-teal-600 hover:bg-teal-200 hover:text-teal-700 transition-colors"
                                   whileHover={{ scale: 1.1 }}
                                   whileTap={{ scale: 0.9 }}
                                 >
-                                  <Edit className="w-4 h-4" />
+                                  <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                                 </motion.button>
                                 {category.products.length > 1 && (
                                   <motion.button
                                     onClick={() => removeProduct(categoryIndex, productIndex)}
-                                    className="p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700 transition-colors"
+                                    className="p-1.5 sm:p-2 rounded-lg bg-red-100 text-red-600 hover:bg-red-200 hover:text-red-700 transition-colors"
                                     whileHover={{ scale: 1.1 }}
                                     whileTap={{ scale: 0.9 }}
                                   >
-                                    <Trash2 className="w-4 h-4" />
+                                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                                   </motion.button>
                                 )}
                               </div>
                             </div>
 
                             {/* Product Card Content */}
-                            <div className="space-y-3">
+                            <div className="space-y-2 sm:space-y-3">
                               <div>
-                                <h4 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-1">
+                                <h4 className="font-semibold text-gray-900 text-xs sm:text-sm md:text-base mb-0.5 sm:mb-1 line-clamp-1">
                                   {product.name || 'Untitled Product'}
                                 </h4>
-                                <p className="text-sm text-gray-600 line-clamp-2 mb-2">
+                                <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 mb-1 sm:mb-2">
                                   {product.description || 'No description provided'}
                                 </p>
                                 {product.hsn_code && (
-                                  <Badge variant="outline" className="text-xs bg-gray-50">
+                                  <Badge variant="outline" className="text-xs bg-gray-50 px-2 py-0.5">
                                     HSN: {product.hsn_code}
                                   </Badge>
                                 )}
                               </div>
 
                               {/* Quick Info */}
-                              <div className="space-y-2">
+                              <div className="space-y-1 sm:space-y-1.5">
                                 {product.specifications.grade && (
-                                  <div className="flex items-center gap-2 text-xs">
-                                    <Shield className="w-3 h-3 text-teal-500" />
-                                    <span className="text-gray-600">Grade: {product.specifications.grade}</span>
+                                  <div className="flex items-center gap-1.5 text-xs">
+                                    <Shield className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-teal-500 flex-shrink-0" />
+                                    <span className="text-gray-600 truncate">Grade: {product.specifications.grade}</span>
                                   </div>
                                 )}
                                 {product.specifications.origin && (
-                                  <div className="flex items-center gap-2 text-xs">
-                                    <Globe className="w-3 h-3 text-teal-500" />
-                                    <span className="text-gray-600">Origin: {product.specifications.origin}</span>
+                                  <div className="flex items-center gap-1.5 text-xs">
+                                    <Globe className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-teal-500 flex-shrink-0" />
+                                    <span className="text-gray-600 truncate">Origin: {product.specifications.origin}</span>
                                   </div>
                                 )}
                                 {product.specifications.moq && (
-                                  <div className="flex items-center gap-2 text-xs">
-                                    <Package className="w-3 h-3 text-teal-500" />
-                                    <span className="text-gray-600">MOQ: {product.specifications.moq}</span>
+                                  <div className="flex items-center gap-1.5 text-xs">
+                                    <Package className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-teal-500 flex-shrink-0" />
+                                    <span className="text-gray-600 truncate">MOQ: {product.specifications.moq}</span>
                                   </div>
                                 )}
                               </div>
 
                               {/* Benefits Count */}
                               {product.key_benefits.filter(b => b.trim()).length > 0 && (
-                                <div className="flex items-center gap-2 text-xs">
-                                  <Star className="w-3 h-3 text-amber-500" />
+                                <div className="flex items-center gap-1.5 text-xs">
+                                  <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-500 flex-shrink-0" />
                                   <span className="text-gray-600">
                                     {product.key_benefits.filter(b => b.trim()).length} key benefits
                                   </span>
@@ -630,11 +630,11 @@ export function ProductStep({
                             {/* Edit Button */}
                             <motion.button
                               onClick={() => openEditProductModal(categoryIndex, productIndex)}
-                              className="w-full mt-4 py-2 px-4 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2"
+                              className="w-full mt-2 sm:mt-3 md:mt-4 py-1.5 sm:py-2 md:py-2.5 px-3 sm:px-4 bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 text-white rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1 sm:gap-2"
                               whileHover={{ scale: 1.02 }}
                               whileTap={{ scale: 0.98 }}
                             >
-                              <Edit className="w-4 h-4" />
+                              <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                               Edit Product Details
                             </motion.button>
                           </motion.div>
@@ -644,11 +644,11 @@ export function ProductStep({
                         <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="text-center py-6 border-2 border-dashed border-teal-200 rounded-xl bg-teal-50/30"
+                          className="text-center py-4 sm:py-6 border-2 border-dashed border-teal-200 rounded-xl bg-teal-50/30"
                         >
-                          <Package className="w-8 h-8 text-teal-400 mx-auto mb-2" />
-                          <p className="text-sm text-gray-600 mb-1">No products added yet</p>
-                          <p className="text-xs text-gray-500">Click the button above to add your products</p>
+                          <Package className="w-6 h-6 sm:w-8 sm:h-8 text-teal-400 mx-auto mb-2" />
+                          <p className="text-xs sm:text-sm text-gray-600 mb-1">No products added yet</p>
+                          <p className="text-xs text-gray-500 hidden sm:block">Click the button above to add your products</p>
                         </motion.div>
                       )}
                     </motion.div>
@@ -662,11 +662,11 @@ export function ProductStep({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-6 border-2 border-dashed border-teal-200 rounded-xl bg-teal-50/30"
+              className="text-center py-4 sm:py-6 border-2 border-dashed border-teal-200 rounded-xl bg-teal-50/30"
             >
-              <Package className="w-8 h-8 text-teal-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-600 mb-1">No category added yet</p>
-              <p className="text-xs text-gray-500">Click the button above to add your category</p>
+              <Package className="w-6 h-6 sm:w-8 sm:h-8 text-teal-400 mx-auto mb-2" />
+              <p className="text-xs sm:text-sm text-gray-600 mb-1">No category added yet</p>
+              <p className="text-xs text-gray-500 hidden sm:block">Click the button above to add your category</p>
             </motion.div>
           )}
               </AccordionContent>
@@ -679,28 +679,28 @@ export function ProductStep({
 
       {/* Product Modal */}
       <Dialog open={isProductModalOpen} onOpenChange={closeProductModal}>
-        <DialogContent className="sm:max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="w-[95vw] sm:max-w-2xl md:max-w-4xl lg:max-w-5xl max-h-[90vh] overflow-y-auto p-3 sm:p-6">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 text-xl">
-              <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center">
-                <Package className="w-5 h-5 text-white" />
+            <DialogTitle className="flex items-center gap-2 sm:gap-3 text-base sm:text-lg md:text-xl">
+              <div className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Package className="w-3 sm:w-4 md:w-5 h-3 sm:h-4 md:h-5 text-white" />
               </div>
               {isEditMode ? 'Edit Product Details' : 'Add New Product'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-xs sm:text-sm">
               {isEditMode ? 'Update your product information' : 'Create a product profile with essential details'}
             </DialogDescription>
           </DialogHeader>
 
           {currentProduct && (
-            <div className="space-y-6 py-4">
+            <div className="space-y-4 sm:space-y-6 py-3 sm:py-4">
               {/* Basic Information */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                  <Target className="w-5 h-5 text-teal-600" />
+              <div className="space-y-3 sm:space-y-4">
+                <h3 className="text-sm sm:text-base md:text-lg font-semibold text-gray-900 flex items-center gap-2">
+                  <Target className="w-4 sm:w-5 h-4 sm:h-5 text-teal-600" />
                   Basic Information
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-3 md:gap-4">
                   <div className="space-y-2">
                     <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                       Product Name *
@@ -738,23 +738,23 @@ export function ProductStep({
               </div>
 
               {/* Modal Actions */}
-              <div className="flex items-center justify-end gap-3 pt-4 border-t">
-                <Button variant="outline" onClick={closeProductModal}>
+              <div className="flex items-center justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t">
+                <Button variant="outline" onClick={closeProductModal} className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2">
                   Cancel
                 </Button>
                 <Button
                   onClick={saveProduct}
-                  className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 disabled:opacity-50"
+                  className="bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700 disabled:opacity-50 text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-2"
                   disabled={!currentProduct.name.trim() || isGenerating}
                 >
                   {isGenerating ? (
                     <>
-                      <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       Generating...
                     </>
                   ) : (
                     <>
-                      <Save className="w-4 h-4 mr-2" />
+                      <Save className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
                       {isEditMode ? 'Update Product' : 'Add Product'}
                     </>
                   )}

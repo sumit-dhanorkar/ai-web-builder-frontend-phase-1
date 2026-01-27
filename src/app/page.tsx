@@ -22,6 +22,8 @@ import {
   Award,
   Users,
   PlayCircle,
+  MessageCircle,
+  Lightbulb,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -86,6 +88,12 @@ export default function HomePage() {
       title: "AI Content Generation",
       description: "Generate compelling product descriptions, company profiles, and technical specifications automatically",
       color: "from-teal-600 to-slate-600"
+    },
+    {
+      icon: MessageCircle,
+      title: "Intelligent Chatbot Builder",
+      description: "Create AI-powered chatbots that guide buyers through your catalog, answer queries, and qualify leads automatically",
+      color: "from-cyan-600 to-teal-600"
     },
     {
       icon: TrendingUp,
@@ -157,15 +165,15 @@ export default function HomePage() {
               <span className="text-gray-800">in Minutes</span>
             </motion.h1>
             
-            <motion.p 
+            <motion.p
               className="text-xl md:text-2xl text-gray-700 mb-10 max-w-4xl mx-auto leading-relaxed font-medium"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              Transform your export business into a stunning professional website with AI. 
-              <span className="text-teal-600 font-semibold">Generate complete websites</span> with 
-              HSN codes, certifications, and export documentation.
+              Transform your export business into a stunning professional website with AI.
+              <span className="text-teal-600 font-semibold">Generate complete websites</span> with
+              HSN codes, certifications, and intelligent chatbots—no coding required.
             </motion.p>
             
             <motion.div 
@@ -291,24 +299,11 @@ export default function HomePage() {
                 onHoverEnd={() => setHoveredFeature(null)}
               >
                 <Card className="group h-full border-0 shadow-xl hover:shadow-2xl transition-all duration-500 bg-white/70 backdrop-blur-md hover:bg-white/80 relative overflow-hidden">
-                  {/* Glass morphism overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  {/* Subtle overlay */}
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
                   
-                  {/* Animated border gradient */}
-                  <motion.div 
-                    className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    animate={{
-                      background: [
-                        "linear-gradient(0deg, transparent, transparent)",
-                        "linear-gradient(360deg, rgba(59, 130, 246, 0.3), rgba(147, 51, 234, 0.3), rgba(59, 130, 246, 0.3))",
-                      ]
-                    }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                    style={{
-                      padding: "2px",
-                      backgroundClip: "padding-box",
-                    }}
-                  />
+                  {/* Subtle border */}
+                  <div className="absolute inset-0 rounded-xl border-2 border-teal-500/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   
                   <CardHeader className="relative pb-4 z-10">
                     <motion.div 
@@ -321,16 +316,6 @@ export default function HomePage() {
                       transition={{ duration: 0.3, type: "spring" }}
                     >
                       <feature.icon className="w-8 h-8 text-white" />
-                      
-                      {/* Glow effect */}
-                      <motion.div
-                        className={`absolute inset-0 rounded-2xl bg-gradient-to-r ${feature.color} opacity-0 blur-lg`}
-                        animate={{
-                          opacity: hoveredFeature === index ? 0.6 : 0,
-                          scale: hoveredFeature === index ? 1.2 : 1
-                        }}
-                        transition={{ duration: 0.3 }}
-                      />
                     </motion.div>
                     <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-gray-800 transition-colors">
                       {feature.title}
@@ -342,29 +327,6 @@ export default function HomePage() {
                     </CardDescription>
                   </CardContent>
                   
-                  {/* Floating particles effect */}
-                  <motion.div
-                    className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
-                    initial={false}
-                  >
-                    {[...Array(3)].map((_, i) => (
-                      <motion.div
-                        key={i}
-                        className="absolute w-1 h-1 bg-teal-400 rounded-full"
-                        animate={{
-                          x: [Math.random() * 100, Math.random() * 300],
-                          y: [Math.random() * 100, Math.random() * 200],
-                          opacity: [0, 1, 0],
-                          scale: [0, 1, 0]
-                        }}
-                        transition={{
-                          duration: 2 + Math.random(),
-                          repeat: Infinity,
-                          delay: Math.random() * 2
-                        }}
-                      />
-                    ))}
-                  </motion.div>
                 </Card>
               </motion.div>
             ))}
@@ -394,18 +356,18 @@ export default function HomePage() {
             {[
               {
                 step: "01",
-                title: "Input Business Info",
-                description: "Fill in your company details, products, and contact information using our intuitive form"
+                title: "Choose Your Path",
+                description: "Select between our form-based builder or conversational chatbot for entering your business information"
               },
               {
-                step: "02", 
-                title: "Customize Sections",
-                description: "Choose which sections to include and customize your website's structure and appearance"
+                step: "02",
+                title: "Define Your Website",
+                description: "Customize sections, design preferences, and chatbot behavior to match your brand and business needs"
               },
               {
                 step: "03",
                 title: "Generate & Deploy",
-                description: "AI creates your complete Next.js website ready for immediate deployment"
+                description: "AI creates your complete Next.js website with integrated chatbot, ready for immediate deployment"
               }
             ].map((step, index) => (
               <motion.div
@@ -415,18 +377,34 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.2 }}
                 viewport={{ once: true }}
+                onHoverStart={() => setHoveredFeature(index)}
+                onHoverEnd={() => setHoveredFeature(null)}
               >
-                <Card className="text-center p-8 border-0 shadow-lg bg-white">
-                  <CardHeader className="pb-6">
-                    <div className="w-16 h-16 bg-gradient-to-r from-teal-700 to-slate-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                <Card className="group text-center p-8 border-0 shadow-xl hover:shadow-2xl transition-all duration-500 bg-white/70 backdrop-blur-md hover:bg-white/80 relative overflow-hidden">
+                  {/* Subtle overlay */}
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl" />
+
+                  {/* Teal border */}
+                  <div className="absolute inset-0 rounded-xl border-2 border-teal-500/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                  <CardHeader className="pb-6 relative z-10">
+                    <motion.div
+                      className="w-16 h-16 bg-gradient-to-r from-teal-700 to-slate-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg"
+                      animate={{
+                        scale: hoveredFeature === index ? 1.1 : 1,
+                        rotate: hoveredFeature === index ? 10 : 0,
+                        y: hoveredFeature === index ? -5 : 0
+                      }}
+                      transition={{ duration: 0.3, type: "spring" }}
+                    >
                       <span className="text-2xl font-bold text-white">{step.step}</span>
-                    </div>
-                    <CardTitle className="text-xl font-semibold text-gray-900">
+                    </motion.div>
+                    <CardTitle className="text-xl font-semibold text-gray-900 group-hover:text-gray-800 transition-colors">
                       {step.title}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <CardDescription className="text-gray-600 text-base leading-relaxed">
+                  <CardContent className="relative z-10">
+                    <CardDescription className="text-gray-600 text-base leading-relaxed group-hover:text-gray-700 transition-colors">
                       {step.description}
                     </CardDescription>
                   </CardContent>

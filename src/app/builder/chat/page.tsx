@@ -21,7 +21,8 @@ import {
   Shield,
   FileText,
   MessageSquare,
-  Palette
+  Palette,
+  X
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Navbar } from '@/components/Navbar'
@@ -182,19 +183,7 @@ function ChatPageContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       {/* Navigation */}
-      <Navbar />
-
-      {/* Mobile Menu Button - Chat specific */}
-      {isMobileMenuOpen && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="fixed top-20 left-6 z-40 lg:hidden border-teal-200 hover:bg-teal-50"
-        >
-          <Menu className="w-5 h-5" />
-        </Button>
-      )}
+      <Navbar onMenuClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} />
 
       {/* Toggle Button */}
       <motion.button
@@ -272,7 +261,7 @@ function ChatPageContent() {
         {isMobileMenuOpen && (
           <>
             <motion.div
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 lg:hidden"
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:z-[9998] lg:hidden"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -280,13 +269,27 @@ function ChatPageContent() {
             />
 
             <motion.div
-              className="fixed left-0 top-20 bottom-0 w-80 bg-white shadow-2xl z-50 lg:hidden overflow-y-auto flex flex-col scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500"
+              className="fixed left-0 top-0 bottom-0 w-72 sm:w-80 bg-white border-r border-gray-200 shadow-2xl z-50 lg:z-[9999] lg:hidden overflow-hidden flex flex-col"
               initial={{ x: -320 }}
               animate={{ x: 0 }}
               exit={{ x: -320 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              <div className="flex-1 p-4">
+              {/* Sidebar Header - Matches Navbar */}
+              <div className="bg-gradient-to-r from-teal-50 to-slate-50 border-b border-gray-200 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between flex-shrink-0">
+                <h2 className="text-sm sm:text-base font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">Progress</h2>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="hover:bg-gray-200/50 text-gray-600 -mr-2 lg:hidden"
+                >
+                  <X className="w-5 h-5" />
+                </Button>
+              </div>
+
+              {/* Sidebar Content */}
+              <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-teal-400 scrollbar-track-transparent hover:scrollbar-thumb-teal-500 p-3 sm:p-4 md:p-6">
                 <EnhancedProgressDisplay
                   currentStep={currentStep}
                   steps={chatSteps}
@@ -295,16 +298,15 @@ function ChatPageContent() {
                 />
               </div>
 
-              {/* Switch to Manual Form Button */}
-              <div className="p-4 pt-6 border-t border-gray-200 mt-6">
+              {/* Switch to Manual Form Button - Footer */}
+              <div className="border-t border-gray-200 bg-gray-50 p-3 sm:p-4 flex-shrink-0">
                 <Button
                   onClick={handleSwitchToForm}
-                  variant="outline"
-                  className="w-full h-12 items-center justify-center gap-2 border-2 border-teal-400 hover:bg-teal-50 text-teal-700 font-medium transition-all duration-200"
+                  className="w-full h-10 sm:h-11 items-center justify-center gap-2 bg-gradient-to-r from-teal-500 to-slate-600 hover:from-teal-600 hover:to-slate-700 text-white font-medium transition-all duration-200 text-xs sm:text-sm shadow-md hover:shadow-lg"
                 >
-                  <FileText className="w-4 h-4" />
-                  <span>Switch to Manual Form</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <FileText className="w-3.5 sm:w-4 h-3.5 sm:h-4 flex-shrink-0" />
+                  <span className="hidden xs:inline">Switch to Form</span>
+                  <span className="xs:hidden">Form</span>
                 </Button>
               </div>
             </motion.div>
