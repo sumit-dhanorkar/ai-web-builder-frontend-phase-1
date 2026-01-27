@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { MultiSelect } from '@/components/ui/multiselect'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Navbar } from '@/components/Navbar'
 import { AIDescriptionAssistant } from '@/components/AIDescriptionAssistant'
 import {
   Building2,
@@ -94,11 +95,12 @@ import { Combobox } from '@/components/ui/combobox'
 import { establishmentYears, exportContriesWithFlags, predefinedCertifications } from '@/data/suggestions'
 import { saveCompleteProject } from '@/lib/firebase-helpers'
 import { useAuth } from '@/lib/auth-context'
+import { useLoading } from '@/lib/loading-context'
 import { apiClient } from '@/lib/api-client'
 import { jobStateManager } from '@/lib/job-state'
 import { Loader } from 'lucide-react'
 import { EnhancedProgressDisplay } from '@/components/EnhancedProgressDisplay'
-import { loadChatDataFromStorage, syncChatToForm, saveChatDataToStorage, clearChatDataFromStorage } from '@/lib/state-sync'
+import { loadChatDataFromStorage, syncChatToForm } from '@/lib/state-sync'
 
 interface BusinessInfo {
   company_name: string
@@ -231,6 +233,8 @@ interface WebsiteConfig {
 export default function BuilderPage() {
   const router = useRouter()
   const { isAuthenticated, loading, user, logout } = useAuth()
+  const { showLoader, hideLoader } = useLoading()
+
   const [currentStep, setCurrentStep] = useState(() => {
     // Load saved step from localStorage on initial render
     if (typeof window !== 'undefined') {
@@ -412,50 +416,37 @@ export default function BuilderPage() {
     checkActiveJob()
   }, [isAuthenticated, loading, router, user])
 
-  // Load form data from Firebase on mount (when user is authenticated)
+  // Load form data on mount - only load for current step
   useEffect(() => {
     const loadData = async () => {
       if (!isAuthenticated || !user?.uid) return
 
       try {
-        // Load business info first
-        const businessInfoRes = await apiClient.getBusinessInfo()
-        let loadedBusinessInfo: Partial<BusinessInfo> = {
-          company_name: '',
-          company_type: '',
-          logo_url: '',
-          year_established: '',
-          iec_code: '',
-          gst_number: '',
-          udyam_adhar: '',
-          description: '',
-          contact: { email: '', phone: '', whatsapp: '', address: '', social_media: { linkedin: '', facebook: '', instagram: '', twitter: '', youtube: '' } },
-          categories: [],
-          export_countries: [],
-          certifications: [],
-          team_members: []
-        }
+        // Only load data for step 0 (business-info) on initial mount
+        if (currentStep === 0) {
+          const businessInfoRes = await apiClient.getBusinessInfo()
+          let loadedBusinessInfo: Partial<BusinessInfo> = {
+            company_name: '',
+            company_type: '',
+            logo_url: '',
+            year_established: '',
+            iec_code: '',
+            gst_number: '',
+            udyam_adhar: '',
+            description: '',
+            contact: { email: '', phone: '', whatsapp: '', address: '', social_media: { linkedin: '', facebook: '', instagram: '', twitter: '', youtube: '' } },
+            categories: [],
+            export_countries: [],
+            certifications: [],
+            team_members: []
+          }
 
-        if (businessInfoRes.has_data && businessInfoRes.data) {
-          console.log('📥 Loaded business info from Firebase')
-          loadedBusinessInfo = { ...loadedBusinessInfo, ...businessInfoRes.data }
-        }
+          if (businessInfoRes.has_data && businessInfoRes.data) {
+            console.log('📥 Loaded business info from Firebase')
+            loadedBusinessInfo = { ...loadedBusinessInfo, ...businessInfoRes.data }
+          }
 
-        // Load product data and merge with business info
-        const productsRes = await apiClient.getCategoryAndProduct()
-        if (productsRes.has_data && productsRes.data?.categories) {
-          console.log('📥 Loaded categories from Firebase')
-          loadedBusinessInfo.categories = productsRes.data.categories || []
-        }
-
-        // Set the merged business info
-        setBusinessInfo(loadedBusinessInfo as BusinessInfo)
-
-        // Load website config separately
-        const configRes = await apiClient.getWebsiteConfig()
-        if (configRes.has_data && configRes.data) {
-          console.log('📥 Loaded website config from Firebase')
-          setWebsiteConfig(configRes.data)
+          setBusinessInfo(loadedBusinessInfo as BusinessInfo)
         }
       } catch (error) {
         console.warn('Failed to load data from Firebase:', error)
@@ -466,11 +457,14 @@ export default function BuilderPage() {
           const mergedData = syncChatToForm(chatData)
           setBusinessInfo(mergedData as BusinessInfo)
         }
+      } finally {
+        // Hide loader after data is loaded (success or error)
+        hideLoader()
       }
     }
 
     loadData()
-  }, [isAuthenticated, user?.uid])
+  }, [isAuthenticated, user?.uid, hideLoader, currentStep])
 
   // Note: Form data is saved explicitly when user clicks "Next" button
   // No auto-save needed - saves on explicit user action
@@ -508,20 +502,9 @@ export default function BuilderPage() {
     }
   }, [showProfileDropdown])
 
-  // Show loading state while checking authentication or active job
+  // Show blank page while checking auth or active job - global loader is visible
   if (loading || checkingActiveJob) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-50">
-        <div className="text-center">
-          <motion.div
-            className="inline-block w-16 h-16 border-4 border-teal-200 border-t-teal-600 rounded-full"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    )
+    return null
   }
 
   // Don't render the page if not authenticated (redirect is happening)
@@ -567,14 +550,17 @@ export default function BuilderPage() {
   }
 
   const handleSwitchToChat = () => {
+    // Show loader before navigation
+    showLoader('💬 Switching to chat mode...')
+
     // Don't transfer form data to chat - chat needs fresh start with welcome message
     // Form data is already auto-saved, so user can come back to form anytime
     console.log('🔄 Switching to chat mode (fresh start)...')
-    
+
     // Clear any existing chat session so user gets fresh welcome message
     sessionStorage.removeItem('current_session_id')
     sessionStorage.removeItem('session_timestamp')
-    
+
     toast.success('Switching to AI Chat...', {
       description: 'Starting a guided conversation'
     })
@@ -642,6 +628,7 @@ export default function BuilderPage() {
 
   const generateWebsite = async () => {
     setIsGenerating(true)
+    showLoader('🚀 Generating your website with AI...')
 
     try {
       // Create job using API client
@@ -677,16 +664,15 @@ export default function BuilderPage() {
       }
     } finally {
       setIsGenerating(false)
+      hideLoader()
     }
   }
 
   const nextStep = async () => {
     if (currentStep < steps.length - 1) {
-      // Save to localStorage
-      saveChatDataToStorage(businessInfo)
-
       // Save to Firebase based on current step
       try {
+        showLoader('💾 Saving your information...')
         if (currentStep === 0 && (businessInfo.company_name || businessInfo.company_type)) {
           // Step 0: Save Business Info
           await apiClient.saveBusinessInfo(businessInfo)
@@ -702,9 +688,32 @@ export default function BuilderPage() {
           await apiClient.saveWebsiteConfig(websiteConfig)
           console.log('✅ Website configuration saved')
         }
+
+        // Load data for next step
+        const nextStepIndex = currentStep + 1
+        if (nextStepIndex === 1) {
+          // Loading Step 1: Category and Product
+          const response = await apiClient.getCategoryAndProduct()
+          if (response.has_data && response.data) {
+            console.log('📥 Loaded categories from Firebase...')
+            setBusinessInfo(prev => ({
+              ...prev,
+              categories: response.data.categories
+            }))
+          }
+        } else if (nextStepIndex === 2) {
+          // Loading Step 2: Website Config
+          const response = await apiClient.getWebsiteConfig()
+          if (response.has_data && response.data) {
+            console.log('📥 Loaded website config from Firebase...')
+            setWebsiteConfig(response.data)
+          }
+        }
       } catch (error) {
-        console.error('Failed to save:', error)
+        console.error('Failed to save or load:', error)
         // Still allow user to proceed even if save fails
+      } finally {
+        hideLoader()
       }
 
       setCurrentStep(currentStep + 1)
@@ -717,6 +726,7 @@ export default function BuilderPage() {
 
       // Load data for previous step from Firebase
       try {
+        showLoader('⬅️ Loading previous step...')
         if (previousStep === 0) {
           // Loading from Step 0: Business Info
           const response = await apiClient.getBusinessInfo()
@@ -745,6 +755,8 @@ export default function BuilderPage() {
       } catch (error) {
         console.warn('Failed to load previous step data:', error)
         // Continue anyway - data in state memory is used as fallback
+      } finally {
+        hideLoader()
       }
 
       // Navigate to previous step
@@ -753,139 +765,53 @@ export default function BuilderPage() {
     }
   }
 
+  // Jump to any step from sidebar
+  const goToStep = async (stepIndex: number) => {
+    if (stepIndex === currentStep) return // Already on this step
+
+    try {
+      showLoader('📂 Loading step data...')
+
+      // Load data for target step
+      if (stepIndex === 0) {
+        // Loading Step 0: Business Info
+        const response = await apiClient.getBusinessInfo()
+        if (response.has_data && response.data) {
+          console.log('📥 Loading business info from Firebase...')
+          setBusinessInfo(response.data as BusinessInfo)
+        }
+      } else if (stepIndex === 1) {
+        // Loading Step 1: Category and Product
+        const response = await apiClient.getCategoryAndProduct()
+        if (response.has_data && response.data) {
+          console.log('📥 Loading categories from Firebase...')
+          setBusinessInfo(prev => ({
+            ...prev,
+            categories: response.data.categories
+          }))
+        }
+      } else if (stepIndex === 2) {
+        // Loading Step 2: Website Config
+        const response = await apiClient.getWebsiteConfig()
+        if (response.has_data && response.data) {
+          console.log('📥 Loading website config from Firebase...')
+          setWebsiteConfig(response.data)
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to load step data:', error)
+      // Continue anyway - data in state memory is used as fallback
+    } finally {
+      hideLoader()
+      setCurrentStep(stepIndex)
+      setIsMobileMenuOpen(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
-      {/* Enhanced Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-gradient-to-r from-white/95 to-gray-50/95 backdrop-blur-xl border-b border-gray-200/50 shadow-lg">
-        <div className="max-w-full mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="flex items-center space-x-3 group">
-              <motion.div
-                className="w-10 h-10 bg-gradient-to-br from-teal-600 to-slate-600 rounded-xl flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300"
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Sparkles className="w-6 h-6 text-white" />
-              </motion.div>
-              <div className="flex flex-col">
-                <span className="text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-700 bg-clip-text text-transparent">
-                  AI Web Builder
-                </span>
-                <span className="text-xs text-gray-500">Professional Website Generator</span>
-              </div>
-            </Link>
-
-            <div className="flex items-center space-x-4">
-              {/* Mobile Menu Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="lg:hidden border-teal-200 hover:bg-teal-50"
-              >
-                <Menu className="w-5 h-5" />
-              </Button>
-
-              <motion.div
-                className="hidden sm:flex items-center space-x-2 text-sm text-gray-600"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-              >
-                <Sparkles className="w-4 h-4 text-teal-500" />
-                <span>AI-Powered Builder</span>
-              </motion.div>
-
-              {/* Profile Dropdown */}
-              <div className="relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                  className="flex items-center space-x-3 p-2 rounded-xl hover:bg-gray-100 transition-all duration-200 group"
-                >
-                  <div className="w-8 h-8 bg-gradient-to-br from-teal-600 to-teal-800 rounded-full flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-                    <User className="w-4 h-4 text-white" />
-                  </div>
-                  <div className="hidden sm:block text-left">
-                    <p className="text-sm font-medium text-gray-900">{user?.email || 'User'}</p>
-                    {user?.is_admin && (
-                      <p className="text-xs text-teal-600 flex items-center gap-1">
-                        <Shield className="w-3 h-3" />
-                        Admin
-                      </p>
-                    )}
-                  </div>
-                  <ChevronDown
-                    className={`w-4 h-4 text-gray-600 transition-transform duration-200 ${
-                      showProfileDropdown ? 'rotate-180' : ''
-                    }`}
-                  />
-                </button>
-
-                <AnimatePresence>
-                  {showProfileDropdown && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                      animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-50"
-                    >
-                      {/* User Info Header */}
-                      <div className="p-3 border-b border-gray-100 bg-gradient-to-br from-gray-50 to-white">
-                        <p className="text-sm font-medium text-gray-900 truncate">{user?.email}</p>
-                        {user?.is_admin && (
-                          <p className="text-xs text-teal-600 mt-0.5 flex items-center gap-1">
-                            <Shield className="w-3 h-3" />
-                            Administrator
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Menu Items */}
-                      <div className="py-1">
-                        {user?.is_admin && (
-                          <>
-                            <button
-                              onClick={() => {
-                                router.push('/dashboard')
-                                setShowProfileDropdown(false)
-                              }}
-                              className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                            >
-                              <LayoutDashboard className="w-4 h-4 text-gray-500" />
-                              Dashboard
-                            </button>
-                            <button
-                              onClick={() => {
-                                router.push('/admin/dashboard')
-                                setShowProfileDropdown(false)
-                              }}
-                              className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-3 transition-colors"
-                            >
-                              <Settings className="w-4 h-4 text-gray-500" />
-                              Admin Panel
-                            </button>
-                            <div className="border-t border-gray-100 my-1"></div>
-                          </>
-                        )}
-                        <button
-                          onClick={() => {
-                            handleLogout()
-                            setShowProfileDropdown(false)
-                          }}
-                          className="w-full px-4 py-2.5 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-3 transition-colors"
-                        >
-                          <LogOut className="w-4 h-4" />
-                          Logout
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* Navigation */}
+      <Navbar />
 
       {/* Toggle Button - Outside Sidebar */}
       <motion.button
@@ -921,7 +847,7 @@ export default function BuilderPage() {
             <EnhancedProgressDisplay
               currentStep={currentStep}
               steps={steps}
-              onStepClick={setCurrentStep}
+              onStepClick={goToStep}
               isCollapsed={isSidebarCollapsed}
             />
           </div>
@@ -1035,10 +961,7 @@ export default function BuilderPage() {
                     return (
                       <div
                         key={step.id}
-                        onClick={() => {
-                          setCurrentStep(index)
-                          setIsMobileMenuOpen(false)
-                        }}
+                        onClick={() => goToStep(index)}
                         className="relative cursor-pointer group"
                       >
                         <div className={`p-4 rounded-xl transition-all duration-300 ${
@@ -1131,12 +1054,11 @@ export default function BuilderPage() {
       </AnimatePresence>
 
       {/* Form Content */}
-      <motion.div
-        className="pt-24 px-6 pb-16 bg-gradient-to-b from-transparent to-gray-50/30"
-        animate={{
+      <div
+        className="pt-24 px-6 pb-16 bg-gradient-to-b from-transparent to-gray-50/30 transition-all duration-300"
+        style={{
           marginLeft: isDesktop ? (isSidebarCollapsed ? '5rem' : '20rem') : '0'
         }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         <div className="max-w-6xl mx-auto">
           <AnimatePresence mode="wait">
@@ -2437,10 +2359,10 @@ export default function BuilderPage() {
                                 className="mt-4"
                                 whileHover={{ scale: 1.02 }}
                               >
-                                <Button 
+                                <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => setCurrentStep(0)}
+                                  onClick={() => goToStep(0)}
                                   className="border-red-300 text-red-700 hover:bg-red-50"
                                 >
                                   <ArrowLeft className="w-4 h-4 mr-2" />
@@ -2527,7 +2449,7 @@ export default function BuilderPage() {
             </motion.div>
           </motion.div>
         </div>
-      </motion.div>
+      </div>
     </div>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -22,61 +22,29 @@ import {
   Award,
   Users,
   PlayCircle,
-  LogIn,
-  UserPlus,
-  LayoutDashboard,
-  LogOut,
-  User,
-  ChevronDown,
-  Settings,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/lib/auth-context'
+import { useLoading } from '@/lib/loading-context'
 import { useActiveJobCheck } from '@/lib/use-active-job-check'
 import { jobStateManager } from '@/lib/job-state'
+import { Navbar } from '@/components/Navbar'
 
 export default function HomePage() {
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null)
-  const { isAuthenticated, user, logout } = useAuth()
-  const { checkAndRedirect } = useActiveJobCheck(user?.uid) // Pass Firebase UID
+  const { isAuthenticated, user } = useAuth()
+  const { checkAndRedirect } = useActiveJobCheck(user?.uid)
   const router = useRouter()
-
-  // Profile dropdown state
-  const [showProfileDropdown, setShowProfileDropdown] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowProfileDropdown(false)
-      }
-    }
-
-    if (showProfileDropdown) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
-    }
-  }, [showProfileDropdown])
-
-  const handleLogout = async () => {
-    try {
-      await logout()
-      jobStateManager.clearActiveJob()
-      router.push('/login')
-    } catch (error) {
-      console.error('Logout error:', error)
-    }
-  }
+  const { showLoader, hideLoader } = useLoading()
 
   const handleStartBuilding = async () => {
     console.log('Start Building clicked:', { isAuthenticated, user: user?.uid })
+    showLoader('🚀 Loading builder...')
+
     if (!isAuthenticated) {
       console.log('Not authenticated, redirecting to login')
+      hideLoader()
       router.push('/login')
       return
     }
@@ -86,12 +54,14 @@ export default function HomePage() {
     const localJob = jobStateManager.getActiveJob(user?.uid)
     if (localJob && localJob.jobId) {
       // Immediately redirect - no waiting for API
+      hideLoader()
       router.push(`/jobs/${localJob.jobId}/progress`)
       return
     }
 
     // Check backend for active job
     const hasActiveJob = await checkAndRedirect()
+    hideLoader()
     if (!hasActiveJob) {
       // No active job, proceed to choice screen
       router.push('/builder/choose')
@@ -140,142 +110,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-50">
       {/* Navigation */}
-      <nav className="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-lg border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <motion.div 
-              className="flex items-center space-x-2"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="w-8 h-8 bg-gradient-to-br from-teal-700 to-slate-600 rounded-lg flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-teal-700 to-slate-600 bg-clip-text text-transparent">
-                AI Web Builder
-              </span>
-            </motion.div>
-            
-            <motion.div
-              className="flex items-center space-x-4"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              {isAuthenticated ? (
-                <>
-                  <Button
-                    onClick={handleStartBuilding}
-                    className="bg-gradient-to-r from-teal-700 to-slate-600 text-white hover:from-teal-800 hover:to-slate-700"
-                  >
-                    Start Building
-                  </Button>
-
-                  {/* Profile Dropdown */}
-                  <div className="relative" ref={dropdownRef}>
-                    <button
-                      onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                      className="inline-flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
-                    >
-                      <div className="w-8 h-8 bg-gradient-to-br from-teal-600 to-teal-800 rounded-full flex items-center justify-center">
-                        <User className="w-4 h-4 text-white" />
-                      </div>
-                      <div className="hidden sm:block text-left">
-                        <p className="text-sm font-medium text-gray-900">{user?.email || 'User'}</p>
-                        {user?.is_admin && (
-                          <p className="text-xs text-teal-600">Admin</p>
-                        )}
-                      </div>
-                      <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showProfileDropdown ? 'rotate-180' : ''}`} />
-                    </button>
-
-                    {/* Dropdown Menu */}
-                    <AnimatePresence>
-                      {showProfileDropdown && (
-                        <motion.div
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.2 }}
-                          className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden z-50"
-                        >
-                          <div className="p-3 border-b border-gray-100 bg-gray-50">
-                            <p className="text-sm font-medium text-gray-900">{user?.email}</p>
-                            <p className="text-xs text-gray-500 mt-0.5">
-                              {user?.company_name || 'No company'}
-                            </p>
-                          </div>
-
-                          <div className="py-1">
-                            {user?.is_admin && (
-                              <>
-                                <button
-                                  onClick={() => {
-                                    setShowProfileDropdown(false)
-                                    router.push('/dashboard')
-                                  }}
-                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                >
-                                  <LayoutDashboard className="w-4 h-4" />
-                                  Dashboard
-                                </button>
-
-                                <button
-                                  onClick={() => {
-                                    setShowProfileDropdown(false)
-                                    router.push('/admin/dashboard')
-                                  }}
-                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                                >
-                                  <Settings className="w-4 h-4" />
-                                  Admin Panel
-                                </button>
-
-                                <div className="border-t border-gray-100 my-1"></div>
-                              </>
-                            )}
-
-                            <button
-                              onClick={handleLogout}
-                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                            >
-                              <LogOut className="w-4 h-4" />
-                              Logout
-                            </button>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <Link href="/login">
-                    <Button variant="ghost" className="flex items-center gap-2">
-                      <LogIn className="w-4 h-4" />
-                      Login
-                    </Button>
-                  </Link>
-                  <Link href="/register">
-                    <Button className="bg-gradient-to-r from-teal-700 to-slate-600 text-white hover:from-teal-800 hover:to-slate-700 flex items-center gap-2">
-                      <UserPlus className="w-4 h-4" />
-                      Sign Up
-                    </Button>
-                  </Link>
-                </>
-              )}
-              <Button
-                onClick={handleStartBuilding}
-                className="md:hidden bg-gradient-to-r from-teal-700 to-slate-600 text-white hover:from-teal-800 hover:to-slate-700"
-              >
-                Start Building
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Hero Section */}
       <section className="relative pt-24 pb-20 px-6 overflow-hidden">

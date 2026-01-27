@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { apiClient } from '@/lib/api-client';
 import { withAuth } from '@/lib/auth-context';
+import { useLoading } from '@/lib/loading-context';
 import { motion } from 'framer-motion';
 import {
   CheckCircle,
@@ -26,6 +27,7 @@ interface Job {
 function SuccessPage() {
   const params = useParams();
   const router = useRouter();
+  const { showLoader, hideLoader } = useLoading();
   const jobId = params.id as string;
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,12 +41,15 @@ function SuccessPage() {
 
   const loadJob = async () => {
     try {
+      showLoader('✅ Loading your website details...');
       const jobData = await apiClient.getJob(jobId);
       setJob(jobData);
       setLoading(false);
+      hideLoader();
     } catch (err: any) {
       setError(err.detail || 'Failed to load job');
       setLoading(false);
+      hideLoader();
     }
   };
 

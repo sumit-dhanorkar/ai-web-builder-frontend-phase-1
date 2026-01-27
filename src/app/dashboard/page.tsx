@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth, withAdmin } from '@/lib/auth-context';
+import { useLoading } from '@/lib/loading-context';
 import { apiClient } from '@/lib/api-client';
 import { useActiveJobCheck } from '@/lib/use-active-job-check';
 import { jobStateManager } from '@/lib/job-state';
@@ -42,6 +43,7 @@ function DashboardPage() {
   const { user, logout } = useAuth();
   const { checkAndRedirect } = useActiveJobCheck(user?.uid); // Pass user ID
   const router = useRouter();
+  const { showLoader, hideLoader } = useLoading();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>('all');
@@ -104,6 +106,7 @@ function DashboardPage() {
 
   const loadJobs = async () => {
     setLoading(true);
+    showLoader('📋 Loading your jobs...');
     try {
       const response = await apiClient.listJobs({
         status: filter === 'all' ? undefined : filter,
@@ -116,6 +119,7 @@ function DashboardPage() {
       console.log('Failed to load jobs:', error);
     } finally {
       setLoading(false);
+      hideLoader();
     }
   };
 

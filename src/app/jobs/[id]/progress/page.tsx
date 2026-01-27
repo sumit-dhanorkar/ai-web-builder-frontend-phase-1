@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { apiClient } from '@/lib/api-client';
 import { withAuth, useAuth } from '@/lib/auth-context';
+import { useLoading } from '@/lib/loading-context';
 import { jobStateManager } from '@/lib/job-state';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -65,6 +66,7 @@ function ProgressPage() {
   const params = useParams();
   const router = useRouter();
   const { user } = useAuth();
+  const { showLoader, hideLoader } = useLoading();
   const jobId = params.id as string;
   const [job, setJob] = useState<Job | null>(null);
   const [steps, setSteps] = useState<ProgressStep[]>([]);
@@ -189,10 +191,13 @@ function ProgressPage() {
 
   const loadJob = async () => {
     try {
+      showLoader('📊 Loading job details...');
       const jobData = await apiClient.getJob(jobId);
       setJob(jobData);
+      hideLoader();
     } catch (err: any) {
       console.error('Failed to load job:', err);
+      hideLoader();
 
       // If job not found, clear localStorage and redirect to builder
       if (err.status === 404 || err.detail?.includes('not found')) {
@@ -210,12 +215,15 @@ function ProgressPage() {
 
   const loadProgress = async () => {
     try {
+      showLoader('⏳ Loading progress data...');
       const progressData = await apiClient.getJobProgress(jobId);
       setSteps(progressData.steps || []);
       setLoading(false);
+      hideLoader();
     } catch (err: any) {
       console.error('Failed to load progress:', err);
       setLoading(false);
+      hideLoader();
     }
   };
 

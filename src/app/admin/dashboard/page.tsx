@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useAuth, withAdmin } from '@/lib/auth-context';
+import { useLoading } from '@/lib/loading-context';
 import { apiClient } from '@/lib/api-client';
 import { jobStateManager } from '@/lib/job-state';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -63,6 +64,7 @@ interface Job {
 function AdminDashboardPage() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const { showLoader, hideLoader } = useLoading();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -107,6 +109,7 @@ function AdminDashboardPage() {
 
   const loadAdminData = async () => {
     setLoading(true);
+    showLoader(`📊 Loading ${view === 'users' ? 'users' : 'jobs'}...`);
     try {
       // Load stats
       const statsData = await apiClient.getAdminStats();
@@ -126,6 +129,7 @@ function AdminDashboardPage() {
       console.error('Failed to load admin data:', error);
     } finally {
       setLoading(false);
+      hideLoader();
     }
   };
 

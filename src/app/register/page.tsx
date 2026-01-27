@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { useLoading } from '@/lib/loading-context';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -30,8 +31,8 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const { register } = useAuth();
+  const { showLoader, hideLoader } = useLoading();
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,7 +57,7 @@ export default function RegisterPage() {
       return;
     }
 
-    setIsLoading(true);
+    showLoader('📝 Creating your account...');
 
     try {
       await register({
@@ -66,12 +67,12 @@ export default function RegisterPage() {
         company_name: formData.company_name || undefined,
         phone: formData.phone || undefined,
       });
+      hideLoader();
       // Redirect to home page after successful registration
       router.push('/');
     } catch (err: any) {
+      hideLoader();
       setError(err.detail || 'Registration failed. Please try again.');
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -143,7 +144,7 @@ export default function RegisterPage() {
                   required
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="you@example.com"
-                  disabled={isLoading}
+                  
                 />
               </div>
             </div>
@@ -168,7 +169,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="John Doe"
-                  disabled={isLoading}
+                  
                 />
               </div>
             </div>
@@ -193,7 +194,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Your Company"
-                  disabled={isLoading}
+                  
                 />
               </div>
             </div>
@@ -218,7 +219,7 @@ export default function RegisterPage() {
                   onChange={handleChange}
                   className="block w-full pl-10 pr-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="+1 (555) 123-4567"
-                  disabled={isLoading}
+                  
                 />
               </div>
             </div>
@@ -244,13 +245,13 @@ export default function RegisterPage() {
                   required
                   className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Min. 8 characters"
-                  disabled={isLoading}
+                  
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  disabled={isLoading}
+                  
                 >
                   {showPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -282,13 +283,13 @@ export default function RegisterPage() {
                   required
                   className="block w-full pl-10 pr-10 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                   placeholder="Re-enter password"
-                  disabled={isLoading}
+                  
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute inset-y-0 right-0 pr-3 flex items-center"
-                  disabled={isLoading}
+                  
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="h-5 w-5 text-gray-400 hover:text-gray-600" />
@@ -326,20 +327,10 @@ export default function RegisterPage() {
             {/* Submit Button */}
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-teal-700 to-slate-600 hover:from-teal-800 hover:to-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+              className="w-full flex items-center justify-center px-4 py-3 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-teal-700 to-slate-600 hover:from-teal-800 hover:to-slate-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 transition-all"
             >
-              {isLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                  Creating account...
-                </>
-              ) : (
-                <>
-                  Create Account
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </>
-              )}
+              Create Account
+              <ArrowRight className="ml-2 h-5 w-5" />
             </button>
           </form>
 

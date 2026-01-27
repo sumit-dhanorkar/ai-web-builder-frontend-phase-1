@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { Message } from './Message'
 import { ReviewAllData } from './ReviewAllData'
 import { useChat } from '@/lib/chat-context'
-import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { apiClient } from '@/lib/api-client'
 import { toast } from 'sonner'
@@ -257,14 +256,10 @@ export function ChatContainer() {
     }
   }, [messages, uiState.scrollToBottom])
 
+  // Show empty chat area while initializing - global loader is visible
   if (uiState.isLoading && messages.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-teal-600 mx-auto mb-4" />
-          <p className="text-gray-600 font-medium">Starting conversation...</p>
-        </div>
-      </div>
+      <div className="flex-1 flex items-center justify-center bg-gradient-to-b from-gray-50 to-white" />
     )
   }
 
