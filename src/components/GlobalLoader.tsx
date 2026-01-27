@@ -18,13 +18,13 @@ export function GlobalLoader() {
   return (
     <AnimatePresence>
       {isLoading && (
-        // Simple full-screen overlay
+        // Simple full-screen overlay - below navbar and sidebar so they always appear on top
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[9999] bg-black/20 backdrop-blur-md flex items-center justify-center pointer-events-auto"
+          className="fixed inset-0 z-[9998] bg-black/20 backdrop-blur-md flex items-center justify-center pointer-events-auto"
         >
           {/* Loading icon - centered */}
           <div className="flex flex-col items-center gap-6">

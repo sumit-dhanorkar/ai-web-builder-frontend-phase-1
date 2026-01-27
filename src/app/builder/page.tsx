@@ -422,6 +422,9 @@ export default function BuilderPage() {
       if (!isAuthenticated || !user?.uid) return
 
       try {
+        // Show loader while fetching data
+        showLoader('📥 Loading your form data...')
+
         // Only load data for step 0 (business-info) on initial mount
         if (currentStep === 0) {
           const businessInfoRes = await apiClient.getBusinessInfo()
@@ -458,13 +461,13 @@ export default function BuilderPage() {
           setBusinessInfo(mergedData as BusinessInfo)
         }
       } finally {
-        // Hide loader after data is loaded (success or error)
+        // Hide loader after API response comes back
         hideLoader()
       }
     }
 
     loadData()
-  }, [isAuthenticated, user?.uid, hideLoader, currentStep])
+  }, [isAuthenticated, user?.uid, hideLoader, showLoader, currentStep])
 
   // Note: Form data is saved explicitly when user clicks "Next" button
   // No auto-save needed - saves on explicit user action
@@ -501,11 +504,6 @@ export default function BuilderPage() {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [showProfileDropdown])
-
-  // Show blank page while checking auth or active job - global loader is visible
-  if (loading || checkingActiveJob) {
-    return null
-  }
 
   // Don't render the page if not authenticated (redirect is happening)
   if (!isAuthenticated) {
@@ -816,7 +814,7 @@ export default function BuilderPage() {
       {/* Toggle Button - Outside Sidebar */}
       <motion.button
         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        className="fixed top-28 z-50 w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 hidden lg:flex"
+        className="fixed top-28 z-[10001] w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 hidden lg:flex"
         animate={{
           left: isSidebarCollapsed ? '4rem' : '19rem'
         }}
@@ -833,7 +831,7 @@ export default function BuilderPage() {
 
       {/* Fixed Sidebar */}
       <motion.aside
-        className="fixed left-0 top-20 h-[calc(100vh-5rem)] bg-gradient-to-br from-white via-teal-50/20 to-slate-50/30 backdrop-blur-sm border-r border-gray-200/50 shadow-2xl z-40 overflow-hidden hidden lg:block"
+        className="fixed left-0 top-20 h-[calc(100vh-5rem)] bg-gradient-to-br from-white via-teal-50/20 to-slate-50/30 backdrop-blur-sm border-r border-gray-200/50 shadow-2xl z-[9999] overflow-hidden hidden lg:block"
         initial={{ x: isSidebarCollapsed ? -100 : -320, opacity: 0 }}
         animate={{
           x: 0,

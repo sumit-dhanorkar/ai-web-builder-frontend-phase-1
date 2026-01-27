@@ -40,7 +40,7 @@ export function Navbar() {
   }
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-[9998] bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-[10000] bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-sm">
       <div className="max-w-full mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}

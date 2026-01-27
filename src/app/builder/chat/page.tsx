@@ -199,7 +199,7 @@ function ChatPageContent() {
       {/* Toggle Button */}
       <motion.button
         onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-        className="fixed top-28 z-50 w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 hidden lg:flex"
+        className="fixed top-28 z-[10001] w-8 h-8 bg-gradient-to-br from-teal-500 to-slate-600 rounded-full flex items-center justify-center shadow-lg hover:shadow-xl hover:scale-110 hidden lg:flex"
         animate={{
           left: isSidebarCollapsed ? '4rem' : '19rem'
         }}
@@ -216,7 +216,7 @@ function ChatPageContent() {
 
       {/* Fixed Sidebar - Same as Builder */}
       <motion.aside
-        className="fixed left-0 top-20 h-[calc(100vh-5rem)] bg-gradient-to-br from-white via-teal-50/20 to-slate-50/30 backdrop-blur-sm border-r border-gray-200/50 shadow-2xl z-40 overflow-hidden hidden lg:block"
+        className="fixed left-0 top-20 h-[calc(100vh-5rem)] bg-gradient-to-br from-white via-teal-50/20 to-slate-50/30 backdrop-blur-sm border-r border-gray-200/50 shadow-2xl z-[9999] overflow-hidden hidden lg:block"
         initial={{ x: isSidebarCollapsed ? -100 : -320, opacity: 0 }}
         animate={{
           x: 0,

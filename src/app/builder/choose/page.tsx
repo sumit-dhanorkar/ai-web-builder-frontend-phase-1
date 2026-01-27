@@ -14,10 +14,19 @@ import Link from 'next/link'
 export default function ChooseBuilderMethodPage() {
   const router = useRouter()
   const { isAuthenticated, loading, user, logout } = useAuth()
-  const { showLoader } = useLoading()
+  const { showLoader, hideLoader } = useLoading()
   const [hoveredCard, setHoveredCard] = useState<'chat' | 'form' | null>(null)
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Show global loader while checking auth
+  useEffect(() => {
+    if (loading) {
+      showLoader('🔐 Checking authentication...')
+    } else {
+      hideLoader()
+    }
+  }, [loading, showLoader, hideLoader])
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -54,25 +63,14 @@ export default function ChooseBuilderMethodPage() {
     router.push('/builder')
   }
 
-  // Show loading state while checking auth
-  if (loading) {
+  // Return early with just Navbar if not authenticated (will redirect soon)
+  // This ensures Navbar is visible with GlobalLoader during auth check
+  if (!isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-50 via-white to-emerald-50">
-        <div className="text-center">
-          <motion.div
-            className="inline-block w-16 h-16 border-4 border-teal-200 border-t-teal-600 rounded-full"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-          />
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-emerald-50">
+        <Navbar />
       </div>
     )
-  }
-
-  // Don't render if not authenticated (will redirect)
-  if (!isAuthenticated) {
-    return null
   }
 
   return (
